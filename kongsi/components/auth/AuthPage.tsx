@@ -46,96 +46,98 @@ export default function AuthPage() {
           >
             Kongsi bareng, hemat bareng!
           </p>
-
         </div>
       </div>
 
       {/* Form panel */}
       <div
         className="
-          flex h-screen w-full flex-1
-          items-center justify-center
+          h-screen min-h-0 w-full flex-1
           overflow-y-auto
           px-5 py-10
           sm:px-8
         "
       >
-        <div className="w-full max-w-[420px]">
-          <div className="mb-7 flex flex-col gap-1.5">
-            <h1
-              className="text-[26px] font-bold text-[#292828]"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              {mode === "login"
-                ? "Selamat datang lagi!"
-                : "Yuk, gabung Kongsi!"}
-            </h1>
-            <p className="text-[15px] text-[#7A7876]">
-              {mode === "login"
-                ? "Masuk untuk lanjut belanja atau kelola usahamu."
-                : "Buat akun dalam waktu kurang dari semenit."}
+        {/* Centering area */}
+        <div className="flex min-h-full w-full items-center justify-center">
+          <div className="w-full max-w-[420px]">
+            <div className="mb-7 flex flex-col gap-1.5">
+              <h1
+                className="text-[26px] font-bold text-[#292828]"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                {mode === "login"
+                  ? "Selamat datang lagi!"
+                  : "Yuk, gabung Kongsi!"}
+              </h1>
+
+              <p className="text-[15px] text-[#7A7876]">
+                {mode === "login"
+                  ? "Masuk untuk lanjut belanja atau kelola usahamu."
+                  : "Buat akun dalam waktu kurang dari semenit."}
+              </p>
+            </div>
+
+            {/* Pill switch between Login and Sign up */}
+            <div className="mb-7 flex rounded-2xl bg-[#E4E1DF]/50 p-1">
+              {(
+                [
+                  { key: "login", label: "Masuk" },
+                  { key: "signup", label: "Daftar" },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setMode(tab.key)}
+                  className={[
+                    "flex-1 rounded-xl py-2.5 text-[15px] font-semibold transition-all",
+                    mode === tab.key
+                      ? "bg-white text-[#3991FA] shadow-[0_1px_4px_rgba(41,40,40,0.08)]"
+                      : "text-[#7A7876] hover:text-[#292828]",
+                  ].join(" ")}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {mode === "login" ? (
+              <LoginForm
+                onForgotPassword={() =>
+                  console.log("[Kongsi] Forgot password clicked (placeholder)")
+                }
+              />
+            ) : (
+              <SignUpForm />
+            )}
+
+            <p className="mt-6 text-center text-sm text-[#7A7876]">
+              {mode === "login" ? (
+                <>
+                  Belum punya akun?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setMode("signup")}
+                    className="font-semibold text-[#3991FA] hover:underline"
+                  >
+                    Daftar sekarang
+                  </button>
+                </>
+              ) : (
+                <>
+                  Sudah punya akun?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setMode("login")}
+                    className="font-semibold text-[#3991FA] hover:underline"
+                  >
+                    Masuk
+                  </button>
+                </>
+              )}
             </p>
           </div>
-
-          {/* Pill switch between Login and Sign up */}
-          <div className="mb-7 flex rounded-2xl bg-[#E4E1DF]/50 p-1">
-            {(
-              [
-                { key: "login", label: "Masuk" },
-                { key: "signup", label: "Daftar" },
-              ] as const
-            ).map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setMode(tab.key)}
-                className={[
-                  "flex-1 rounded-xl py-2.5 text-[15px] font-semibold transition-all",
-                  mode === tab.key
-                    ? "bg-white text-[#3991FA] shadow-[0_1px_4px_rgba(41,40,40,0.08)]"
-                    : "text-[#7A7876] hover:text-[#292828]",
-                ].join(" ")}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {mode === "login" ? (
-            <LoginForm
-              onForgotPassword={() =>
-                console.log("[Kongsi] Forgot password clicked (placeholder)")
-              }
-            />
-          ) : (
-            <SignUpForm />
-          )}
-
-          <p className="mt-6 text-center text-sm text-[#7A7876]">
-            {mode === "login" ? (
-              <>
-                Belum punya akun?{" "}
-                <button
-                  type="button"
-                  onClick={() => setMode("signup")}
-                  className="font-semibold text-[#3991FA] hover:underline"
-                >
-                  Daftar sekarang
-                </button>
-              </>
-            ) : (
-              <>
-                Sudah punya akun?{" "}
-                <button
-                  type="button"
-                  onClick={() => setMode("login")}
-                  className="font-semibold text-[#3991FA] hover:underline"
-                >
-                  Masuk
-                </button>
-              </>
-            )}
-          </p>
         </div>
       </div>
     </div>
