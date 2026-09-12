@@ -284,7 +284,8 @@ export const NOTIFICATIONS: NotificationItem[] = [
     id: "notif-2",
     type: "siap-diambil",
     title: "Pesanan siap diambil",
-    description: "Keripik Singkong Pedas sudah bisa diambil di Warung Renyah Jaya.",
+    description:
+      "Keripik Singkong Pedas sudah bisa diambil di Warung Renyah Jaya.",
     time: "09:02",
     group: "Hari ini",
     unread: true,
@@ -320,23 +321,12 @@ export const NOTIFICATIONS: NotificationItem[] = [
     id: "notif-6",
     type: "dikembalikan",
     title: "Pembayaran dikembalikan",
-    description: "Anyaman Tas Rotan tidak mencapai target. Dana sudah dikembalikan.",
+    description:
+      "Anyaman Tas Rotan tidak mencapai target. Dana sudah dikembalikan.",
     time: "08:15",
     group: "Kemarin",
     unread: false,
   },
-];
-
-export interface Address {
-  id: string;
-  label: string;
-  detail: string;
-  isPrimary?: boolean;
-}
-
-export const ADDRESSES: Address[] = [
-  { id: "addr-1", label: "Rumah", detail: "Jl. Contoh No. 123, Cipondoh, Tangerang", isPrimary: true },
-  { id: "addr-2", label: "Kantor", detail: "Jl. Melati Raya No. 45, Karawaci, Tangerang" },
 ];
 
 export const MOCK_PROFILE = {

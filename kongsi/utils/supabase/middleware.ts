@@ -30,7 +30,18 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Refresh auth token if expired
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const isProtectedRoute = request.nextUrl.pathname.startsWith("/customer");
+
+  if (isProtectedRoute && !user) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.search = "";
+    return NextResponse.redirect(loginUrl);
+  }
 
   return supabaseResponse;
 }

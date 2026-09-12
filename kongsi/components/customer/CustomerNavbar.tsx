@@ -3,22 +3,39 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 import { BellIcon, CloseIcon, MenuIcon, SearchIcon } from "./icons";
-
-// Mock/static auth state for demonstration purposes only.
-// Flip this to `false` to preview the logged-out state.
-const MOCK_IS_LOGGED_IN = true;
-const MOCK_AVATAR_INITIAL = "D";
 
 const NAV_LINKS = [
   { href: "/", label: "Jelajahi" },
   { href: "/customer/orders", label: "Pesanan" },
 ] as const;
 
+const supabase = createClient();
+
 export default function CustomerNavbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileInitial, setProfileInitial] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadUser() {
+      const { data } = await supabase.auth.getUser();
+      const name = data.user?.user_metadata?.name || data.user?.email;
+      setProfileInitial(name ? name.charAt(0).toUpperCase() : null);
+    }
+
+    loadUser();
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        const name = session?.user.user_metadata?.name || session?.user.email;
+        setProfileInitial(name ? name.charAt(0).toUpperCase() : null);
+      },
+    );
+
+    return () => authListener.subscription.unsubscribe();
+  }, [supabase]);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -91,17 +108,17 @@ export default function CustomerNavbar() {
           </Link>
 
           {/* Profile / Login */}
-          {MOCK_IS_LOGGED_IN ? (
+          {profileInitial ? (
             <Link
               href="/customer/profile"
               aria-label="Profil saya"
               className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-white/20 font-[family-name:var(--font-body)] text-sm font-semibold text-white ring-2 ring-white/30 transition-shadow hover:ring-white/60"
             >
-              {MOCK_AVATAR_INITIAL}
+              {profileInitial}
             </Link>
           ) : (
             <Link
-              href="/auth/login"
+              href="/login"
               className="whitespace-nowrap rounded-full bg-white px-4 py-2 font-[family-name:var(--font-body)] text-sm font-semibold text-[#3991FA] transition-colors hover:bg-white/90"
             >
               Login / Sign Up
@@ -172,21 +189,20 @@ export default function CustomerNavbar() {
             Notifikasi
           </Link>
 
-          {MOCK_IS_LOGGED_IN ? (
+          {profileInitial ? (
             <Link
               href="/customer/profile"
               onClick={() => setMobileOpen(false)}
               className="mt-1 flex items-center gap-2.5 rounded-xl px-3 py-2.5 font-[family-name:var(--font-body)] text-[15px] font-semibold text-white transition-colors hover:bg-white/10"
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-xs font-semibold ring-2 ring-white/30">
-                {MOCK_AVATAR_INITIAL}
+                {profileInitial}
               </span>
-
               Profil saya
             </Link>
           ) : (
             <Link
-              href="/auth/login"
+              href="/login"
               onClick={() => setMobileOpen(false)}
               className="mt-1 rounded-xl bg-white px-3 py-2.5 text-center font-[family-name:var(--font-body)] text-[15px] font-semibold text-[#3991FA]"
             >

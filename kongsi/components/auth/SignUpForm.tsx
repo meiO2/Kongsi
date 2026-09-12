@@ -128,7 +128,7 @@ export default function SignUpForm() {
             businessAddress:
               data.accountType === "umkm" ? data.businessAddress.trim() : null,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
         },
       });
 
@@ -145,7 +145,7 @@ export default function SignUpForm() {
 
       // If Supabase has confirm email disabled, user has session immediately
       if (authData.session) {
-        router.push("/dashboard");
+        router.push("/");
         router.refresh();
         return;
       }

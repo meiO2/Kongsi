@@ -70,7 +70,7 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
     const { error } = await supabase.auth.resetPasswordForEmail(
       data.identifier.trim(),
       {
-        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/`,
       },
     );
 
@@ -121,7 +121,7 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
       }
 
       if (authData.user) {
-        router.push("/dashboard");
+        router.push("/");
         router.refresh();
       }
     } catch (err: unknown) {
