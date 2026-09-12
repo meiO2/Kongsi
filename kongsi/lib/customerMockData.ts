@@ -28,7 +28,9 @@ export interface GroupDeal {
   timeLeft: string;
   distanceLabel?: string;
   locationLabel?: string;
+  category?: string;
   imageEmoji: string;
+  imageUrl?: string;
 }
 
 export const RECOMMENDED_DEALS: GroupDeal[] = [

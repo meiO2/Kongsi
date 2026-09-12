@@ -46,6 +46,12 @@ create policy "UMKM can view own group deals"
   to authenticated
   using (owner_id = (select auth.uid()));
 
+drop policy if exists "Customers can view active group deals" on public.group_deals;
+create policy "Customers can view active group deals"
+  on public.group_deals for select
+  to anon, authenticated
+  using (status = 'berlangsung');
+
 drop policy if exists "UMKM can create own group deals" on public.group_deals;
 create policy "UMKM can create own group deals"
   on public.group_deals for insert

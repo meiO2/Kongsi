@@ -9,15 +9,26 @@ interface DealCardProps {
   highlight?: boolean;
 }
 
-export default function DealCard({ deal, variant = "default", highlight = false }: DealCardProps) {
+export default function DealCard({
+  deal,
+  variant = "default",
+  highlight = false,
+}: DealCardProps) {
   const isAlmostThere =
     highlight || deal.currentParticipants >= deal.targetParticipants - 2;
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#E4E1DF] bg-white transition-shadow hover:shadow-[0_4px_16px_rgba(41,40,40,0.08)]">
       {/* Image placeholder */}
-      <div className="flex aspect-[4/3] w-full items-center justify-center bg-[#F1EFEF] text-5xl">
-        <span aria-hidden>{deal.imageEmoji}</span>
+      <div
+        className="flex aspect-[4/3] w-full items-center justify-center bg-cover bg-center bg-[#F1EFEF] text-5xl"
+        style={
+          deal.imageUrl
+            ? { backgroundImage: `url(${deal.imageUrl})` }
+            : undefined
+        }
+      >
+        {!deal.imageUrl && <span aria-hidden>{deal.imageEmoji}</span>}
       </div>
 
       <div className="flex flex-1 flex-col gap-2.5 p-4">
@@ -42,16 +53,23 @@ export default function DealCard({ deal, variant = "default", highlight = false 
           <span className="text-xs text-[#7A7876] line-through">
             {formatRupiah(deal.normalPrice)}
           </span>
-          <span className="text-base font-bold text-[#3991FA]" style={{ fontFamily: "var(--font-heading)" }}>
+          <span
+            className="text-base font-bold text-[#3991FA]"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
             {formatRupiah(deal.kongsiPrice)}
           </span>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <ProgressBar current={deal.currentParticipants} target={deal.targetParticipants} />
+          <ProgressBar
+            current={deal.currentParticipants}
+            target={deal.targetParticipants}
+          />
           <div className="flex items-center justify-between text-xs text-[#7A7876]">
             <span>
-              {deal.currentParticipants}/{deal.targetParticipants} orang sudah ikut
+              {deal.currentParticipants}/{deal.targetParticipants} orang sudah
+              ikut
             </span>
             {variant !== "nearby" && (
               <span className="flex items-center gap-1">
