@@ -121,7 +121,14 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
       }
 
       if (authData.user) {
-        router.push("/");
+        const metadata = authData.user.user_metadata || {};
+        const isUmkm =
+          metadata.accountType === "umkm" ||
+          metadata.role === "UMKM" ||
+          metadata.role?.toLowerCase() === "umkm" ||
+          metadata.account_type === "umkm";
+        const destination = isUmkm ? "/umkm" : "/";
+        router.push(destination);
         router.refresh();
       }
     } catch (err: unknown) {

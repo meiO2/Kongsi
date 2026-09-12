@@ -1,18 +1,26 @@
 import type { ActiveKongsi } from "@/lib/umkmMockData";
 import { formatRupiah } from "@/lib/umkmMockData";
+import Link from "next/link";
 import { ClockIcon } from "./icons";
 
 export default function ActiveKongsiCard({ kongsi }: { kongsi: ActiveKongsi }) {
   const percent = Math.min(
     100,
-    Math.round((kongsi.currentParticipants / kongsi.targetParticipants) * 100)
+    Math.round((kongsi.currentParticipants / kongsi.targetParticipants) * 100),
   );
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-[#E4E1DF] bg-white p-4">
       <div className="flex gap-3">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#F1EFEF] text-3xl">
-          <span aria-hidden>{kongsi.imageEmoji}</span>
+        <div
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-cover bg-center bg-[#F1EFEF] text-3xl"
+          style={
+            kongsi.imageUrl
+              ? { backgroundImage: `url(${kongsi.imageUrl})` }
+              : undefined
+          }
+        >
+          {!kongsi.imageUrl && <span aria-hidden>{kongsi.imageEmoji}</span>}
         </div>
         <div className="min-w-0 flex-1">
           <h3
@@ -25,7 +33,10 @@ export default function ActiveKongsiCard({ kongsi }: { kongsi: ActiveKongsi }) {
             <span className="text-xs text-[#7A7876] line-through">
               {formatRupiah(kongsi.normalPrice)}
             </span>
-            <span className="text-[15px] font-bold text-[#3991FA]" style={{ fontFamily: "var(--font-heading)" }}>
+            <span
+              className="text-[15px] font-bold text-[#3991FA]"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
               {formatRupiah(kongsi.kongsiPrice)}
             </span>
           </div>
@@ -34,7 +45,10 @@ export default function ActiveKongsiCard({ kongsi }: { kongsi: ActiveKongsi }) {
 
       <div className="flex flex-col gap-1.5">
         <div className="h-2 w-full overflow-hidden rounded-full bg-[#E4E1DF]/60">
-          <div className="h-full rounded-full bg-[#3991FA]" style={{ width: `${percent}%` }} />
+          <div
+            className="h-full rounded-full bg-[#3991FA]"
+            style={{ width: `${percent}%` }}
+          />
         </div>
         <div className="flex items-center justify-between text-xs text-[#7A7876]">
           <span>
@@ -51,12 +65,12 @@ export default function ActiveKongsiCard({ kongsi }: { kongsi: ActiveKongsi }) {
         🔥 {kongsi.remainingLabel}
       </span>
 
-      <button
-        type="button"
-        className="mt-1 w-full rounded-xl bg-[#3991FA] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#2B7FE0]"
+      <Link
+        href={`/umkm/kongsi/${kongsi.id}`}
+        className="mt-1 flex w-full items-center justify-center rounded-xl bg-[#3991FA] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#2B7FE0]"
       >
         Kelola Kongsi
-      </button>
+      </Link>
     </div>
   );
 }

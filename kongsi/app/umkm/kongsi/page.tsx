@@ -1,16 +1,90 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import KongsiCard from "@/components/umkm/KongsiCard";
 import { PlusIcon } from "@/components/umkm/icons";
-import { KONGSI_DEALS, KONGSI_FILTERS, type KongsiStatus } from "@/lib/kongsiMockData";
+import {
+  KONGSI_FILTERS,
+  type FulfillmentMethod,
+  type KongsiCategory,
+  type KongsiDeal,
+  type KongsiStatus,
+} from "@/lib/kongsiMockData";
+
+interface GroupDealResponse {
+  id: string;
+  product_name: string;
+  description: string;
+  image_url: string | null;
+  normal_price: number;
+  kongsi_price: number;
+  current_participants: number;
+  target_participants: number;
+  deadline: string;
+  category: KongsiCategory;
+  fulfillment: FulfillmentMethod;
+  pickup_location: string | null;
+  pickup_hours: string | null;
+  delivery_fee: number | null;
+  status: KongsiStatus;
+}
+
+function mapDeal(deal: GroupDealResponse): KongsiDeal {
+  return {
+    id: deal.id,
+    name: deal.product_name,
+    description: deal.description,
+    imageUrl: deal.image_url ?? undefined,
+    imageEmoji: "📦",
+    category: deal.category,
+    normalPrice: deal.normal_price,
+    kongsiPrice: deal.kongsi_price,
+    currentParticipants: deal.current_participants,
+    targetParticipants: deal.target_participants,
+    timeLeft: deal.deadline,
+    status: deal.status,
+    fulfillment: deal.fulfillment,
+    pickupLocation: deal.pickup_location ?? undefined,
+    pickupHours: deal.pickup_hours ?? undefined,
+    deliveryFee: deal.delivery_fee ?? undefined,
+  };
+}
 
 export default function KongsiListPage() {
   const [filter, setFilter] = useState<KongsiStatus | "semua">("semua");
+  const [deals, setDeals] = useState<KongsiDeal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadDeals() {
+      try {
+        const response = await fetch("/api/group-deals");
+        const result = (await response.json()) as
+          | GroupDealResponse[]
+          | { error?: string };
+        if (!response.ok) {
+          setError(
+            "error" in result
+              ? (result.error ?? "Kongsi gagal dimuat.")
+              : "Kongsi gagal dimuat.",
+          );
+          return;
+        }
+        setDeals((result as GroupDealResponse[]).map(mapDeal));
+      } catch {
+        setError("Tidak dapat terhubung ke backend.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDeals();
+  }, []);
 
   const filteredDeals =
-    filter === "semua" ? KONGSI_DEALS : KONGSI_DEALS.filter((deal) => deal.status === filter);
+    filter === "semua" ? deals : deals.filter((deal) => deal.status === filter);
 
   return (
     <main className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 pb-16 pt-8 sm:px-6">
@@ -22,7 +96,9 @@ export default function KongsiListPage() {
           >
             Kongsi
           </h1>
-          <p className="mt-1 text-[15px] text-[#7A7876]">Kelola semua Group Deal tokomu.</p>
+          <p className="mt-1 text-[15px] text-[#7A7876]">
+            Kelola semua Group Deal tokomu.
+          </p>
         </div>
 
         <Link
@@ -52,7 +128,15 @@ export default function KongsiListPage() {
         ))}
       </div>
 
-      {filteredDeals.length > 0 ? (
+      {loading ? (
+        <div className="rounded-2xl border border-dashed border-[#E4E1DF] py-14 text-center">
+          <p className="text-sm text-[#7A7876]">Memuat Kongsi...</p>
+        </div>
+      ) : error ? (
+        <div className="rounded-2xl border border-[#E14B4B]/30 bg-[#E14B4B]/10 py-14 text-center">
+          <p className="text-sm text-[#E14B4B]">{error}</p>
+        </div>
+      ) : filteredDeals.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filteredDeals.map((deal) => (
             <KongsiCard key={deal.id} deal={deal} />
@@ -60,7 +144,9 @@ export default function KongsiListPage() {
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-[#E4E1DF] py-14 text-center">
-          <p className="text-sm text-[#7A7876]">Belum ada Kongsi di kategori ini.</p>
+          <p className="text-sm text-[#7A7876]">
+            Belum ada Kongsi di kategori ini.
+          </p>
         </div>
       )}
     </main>

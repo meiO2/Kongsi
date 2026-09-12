@@ -2,7 +2,14 @@
 
 import { useId, type ChangeEvent } from "react";
 
-type FieldType = "text" | "number" | "textarea" | "select" | "file";
+type FieldType =
+  | "text"
+  | "number"
+  | "date"
+  | "time"
+  | "textarea"
+  | "select"
+  | "file";
 
 interface Option {
   value: string;
@@ -23,6 +30,7 @@ interface FormFieldProps {
   options?: Option[];
   rows?: number;
   prefix?: string;
+  min?: string | number;
 }
 
 const BASE_INPUT_CLASSES =
@@ -42,13 +50,18 @@ export default function FormField({
   options = [],
   rows = 4,
   prefix,
+  min,
 }: FormFieldProps) {
   const id = useId();
   const borderClass = error
     ? "border-[#E14B4B] focus:border-[#E14B4B] focus:ring-[#E14B4B]/15"
     : "border-[#E4E1DF] focus:border-[#3991FA] focus:ring-[#3991FA]/15";
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    event: ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     onChange?.(event.target.value);
   };
 
@@ -75,7 +88,9 @@ export default function FormField({
           id={id}
           value={value}
           onChange={handleChange}
-          className={[BASE_INPUT_CLASSES, borderClass, "appearance-none"].join(" ")}
+          className={[BASE_INPUT_CLASSES, borderClass, "appearance-none"].join(
+            " ",
+          )}
         >
           <option value="" disabled>
             {placeholder ?? "Pilih salah satu"}
@@ -107,12 +122,17 @@ export default function FormField({
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={(event) => onFileChange?.(event.target.files?.[0] ?? null)}
+            onChange={(event) =>
+              onFileChange?.(event.target.files?.[0] ?? null)
+            }
           />
         </label>
       )}
 
-      {(type === "text" || type === "number") && (
+      {(type === "text" ||
+        type === "number" ||
+        type === "date" ||
+        type === "time") && (
         <div className="relative">
           {prefix && (
             <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[#7A7876]">
@@ -122,10 +142,15 @@ export default function FormField({
           <input
             id={id}
             type={type}
+            min={min}
             value={value}
             onChange={handleChange}
             placeholder={placeholder}
-            className={[BASE_INPUT_CLASSES, borderClass, prefix ? "pl-11" : ""].join(" ")}
+            className={[
+              BASE_INPUT_CLASSES,
+              borderClass,
+              prefix ? "pl-11" : "",
+            ].join(" ")}
           />
         </div>
       )}

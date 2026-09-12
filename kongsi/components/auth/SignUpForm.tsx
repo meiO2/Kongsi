@@ -121,11 +121,19 @@ export default function SignUpForm() {
             name: data.name.trim(),
             phone: data.phone.trim(),
             accountType: data.accountType,
+            account_type: data.accountType,
+            role: data.accountType === "umkm" ? "UMKM" : "CUSTOMER",
             businessName:
+              data.accountType === "umkm" ? data.businessName.trim() : null,
+            business_name:
               data.accountType === "umkm" ? data.businessName.trim() : null,
             businessCategory:
               data.accountType === "umkm" ? data.businessCategory : null,
+            business_category:
+              data.accountType === "umkm" ? data.businessCategory : null,
             businessAddress:
+              data.accountType === "umkm" ? data.businessAddress.trim() : null,
+            business_address:
               data.accountType === "umkm" ? data.businessAddress.trim() : null,
           },
           emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
@@ -145,7 +153,14 @@ export default function SignUpForm() {
 
       // If Supabase has confirm email disabled, user has session immediately
       if (authData.session) {
-        router.push("/");
+        const metadata = authData.user?.user_metadata || {};
+        const isUmkm =
+          metadata.accountType === "umkm" ||
+          metadata.role === "UMKM" ||
+          metadata.role?.toLowerCase() === "umkm" ||
+          metadata.account_type === "umkm";
+        const destination = isUmkm ? "/umkm" : "/";
+        router.push(destination);
         router.refresh();
         return;
       }

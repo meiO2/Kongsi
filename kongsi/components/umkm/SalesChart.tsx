@@ -9,7 +9,7 @@ const BAR_WIDTH = 28;
 const GAP = 20;
 
 export default function SalesChart({ data }: SalesChartProps) {
-  const max = Math.max(...data.map((d) => d.value));
+  const max = Math.max(1, ...data.map((d) => d.value));
   const width = data.length * (BAR_WIDTH + GAP) - GAP;
 
   return (

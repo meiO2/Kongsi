@@ -13,14 +13,22 @@ const RESULT_NOTE: Record<KongsiDeal["status"], string | null> = {
 
 export default function KongsiCard({ deal }: { deal: KongsiDeal }) {
   const isAlmostThere =
-    deal.status === "berlangsung" && deal.currentParticipants >= deal.targetParticipants - 2;
+    deal.status === "berlangsung" &&
+    deal.currentParticipants >= deal.targetParticipants - 2;
   const resultNote = RESULT_NOTE[deal.status];
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-[#E4E1DF] bg-white p-4">
       <div className="flex items-start gap-3">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#F1EFEF] text-3xl">
-          <span aria-hidden>{deal.imageEmoji}</span>
+        <div
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-cover bg-center bg-[#F1EFEF] text-3xl"
+          style={
+            deal.imageUrl
+              ? { backgroundImage: `url(${deal.imageUrl})` }
+              : undefined
+          }
+        >
+          {!deal.imageUrl && <span aria-hidden>{deal.imageEmoji}</span>}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
@@ -35,7 +43,10 @@ export default function KongsiCard({ deal }: { deal: KongsiDeal }) {
             <span className="text-xs text-[#7A7876] line-through">
               {formatRupiah(deal.normalPrice)}
             </span>
-            <span className="text-[15px] font-bold text-[#3991FA]" style={{ fontFamily: "var(--font-heading)" }}>
+            <span
+              className="text-[15px] font-bold text-[#3991FA]"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
               {formatRupiah(deal.kongsiPrice)}
             </span>
           </div>
@@ -51,7 +62,8 @@ export default function KongsiCard({ deal }: { deal: KongsiDeal }) {
 
       {isAlmostThere && (
         <span className="inline-flex w-fit items-center gap-1 rounded-full bg-[#FFCF00]/20 px-2.5 py-1 text-xs font-semibold text-[#7A6300]">
-          🔥 Tinggal {deal.targetParticipants - deal.currentParticipants} pembeli lagi!
+          🔥 Tinggal {deal.targetParticipants - deal.currentParticipants}{" "}
+          pembeli lagi!
         </span>
       )}
 
