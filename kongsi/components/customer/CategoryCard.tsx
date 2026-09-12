@@ -1,24 +1,28 @@
-    type CategoryCardProps = {
-    name: string;
-    icon: string;
-    };
+import type { Category } from "@/lib/customerMockData";
 
-    export default function CategoryCard({
-    name,
-    icon,
-    }: CategoryCardProps) {
-    return (
-        <button
-        type="button"
-        className="group flex min-w-[105px] flex-col items-center gap-3 rounded-2xl border border-[#E8E6E4] bg-white p-4 transition-all hover:-translate-y-1 hover:border-[#3991FA]/30 hover:shadow-[0_6px_20px_rgba(57,145,250,0.10)]"
-        >
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#3991FA]/10 text-2xl transition-transform group-hover:scale-105">
-            {icon}
-        </div>
+interface CategoryCardProps {
+  category: Category;
+  active?: boolean;
+  onClick?: () => void;
+}
 
-        <span className="text-center text-sm font-semibold text-[#404040]">
-            {name}
-        </span>
-        </button>
-    );
-    }
+export default function CategoryCard({ category, active = false, onClick }: CategoryCardProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={[
+        "flex shrink-0 items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors",
+        active
+          ? "border-[#3991FA] bg-[#3991FA]/[0.06] text-[#3991FA]"
+          : "border-[#E4E1DF] bg-white text-[#292828] hover:border-[#3991FA]/40",
+      ].join(" ")}
+    >
+      <span className="text-lg leading-none" aria-hidden>
+        {category.emoji}
+      </span>
+      <span>{category.label}</span>
+    </button>
+  );
+}

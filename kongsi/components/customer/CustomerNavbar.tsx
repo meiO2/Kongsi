@@ -1,95 +1,200 @@
-    "use client";
+"use client";
 
-    import Image from "next/image";
-    import Link from "next/link";
-    import { usePathname } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { BellIcon, CloseIcon, MenuIcon, SearchIcon } from "./icons";
 
-    const navItems = [
-    {
-        label: "Jelajahi",
-        href: "/",
-    },
-    {
-        label: "Pesanan",
-        href: "/customer/orders",
-    },
-    {
-        label: "Notifikasi",
-        href: "/customer/notifications",
-    },
-    {
-        label: "Profil",
-        href: "/customer/profile",
-    },
-    ];
+// Mock/static auth state for demonstration purposes only.
+// Flip this to `false` to preview the logged-out state.
+const MOCK_IS_LOGGED_IN = true;
+const MOCK_AVATAR_INITIAL = "D";
 
-    export default function CustomerNavbar() {
-    const pathname = usePathname();
+const NAV_LINKS = [
+  { href: "/", label: "Jelajahi" },
+  { href: "/customer/orders", label: "Pesanan" },
+] as const;
 
-    return (
-        <header className="sticky top-0 z-50 bg-[#3991FA]">
-        <nav className="mx-auto flex h-[82px] w-full items-center justify-between px-6 sm:px-10 lg:px-16">
-            {/* Logo */}
-            <Link href="/" className="shrink-0">
-            <Image
-                src="/logo.png"
-                alt="Kongsi!"
-                width={150}
-                height={60}
-                className="h-auto w-28 sm:w-32"
-                priority
+export default function CustomerNavbar() {
+  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  return (
+    <header className="sticky top-0 z-40 bg-[#3991FA] font-[family-name:var(--font-body)]">
+      <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center gap-4 px-4 sm:px-6">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="flex shrink-0 items-center"
+          aria-label="Kongsi! — Beranda"
+        >
+          <Image
+            src="/logo.png"
+            alt="Kongsi!"
+            width={110}
+            height={54}
+            className="h-8 w-auto sm:h-9"
+            priority
+          />
+        </Link>
+
+        {/* Search — desktop/tablet */}
+        <div className="hidden flex-1 sm:block sm:max-w-md md:max-w-lg">
+          <label className="relative block w-full">
+            <span className="sr-only">Cari produk atau Kongsi</span>
+
+            <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7876]" />
+
+            <input
+              type="search"
+              placeholder="Cari produk atau Kongsi..."
+              className="w-full rounded-full border border-transparent bg-white py-2.5 pl-10 pr-4 font-[family-name:var(--font-body)] text-sm text-[#292828] placeholder:text-[#B3B0AE] outline-none transition-shadow focus:ring-4 focus:ring-white/40"
             />
+          </label>
+        </div>
+
+        {/* Right side — desktop nav */}
+        <nav className="ml-auto hidden items-center gap-6 sm:flex">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={[
+                "relative pb-1 font-[family-name:var(--font-body)] text-[15px] font-semibold text-white/90 transition-colors hover:text-white",
+                isActive(link.href) ? "text-white" : "",
+              ].join(" ")}
+            >
+              {link.label}
+
+              {isActive(link.href) && (
+                <span className="absolute -bottom-0.5 left-0 right-0 h-[2px] rounded-full bg-white" />
+              )}
             </Link>
+          ))}
 
-            {/* Desktop Navigation */}
-            <div className="hidden items-center gap-8 md:flex lg:gap-12">
-            {navItems.map((item) => {
-                const isActive =
-                item.href === "/"
-                    ? pathname === "/"
-                    : pathname.startsWith(item.href);
+          {/* Notifications */}
+          <Link
+            href="/customer/notifications"
+            aria-label="Notifikasi"
+            className={[
+              "relative flex h-9 w-9 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10 hover:text-white",
+              isActive("/customer/notifications")
+                ? "bg-white/10 text-white"
+                : "",
+            ].join(" ")}
+          >
+            <BellIcon className="h-5 w-5" />
+          </Link>
 
-                return (
-                <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`relative py-2 text-[17px] font-semibold transition-colors ${
-                    isActive
-                        ? "text-white"
-                        : "text-white/80 hover:text-white"
-                    }`}
-                >
-                    {item.label}
-
-                    {isActive && (
-                    <span className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full bg-white" />
-                    )}
-                </Link>
-                );
-            })}
-            </div>
-
-            {/* Mobile menu placeholder */}
-            <button
-            type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20 md:hidden"
-            aria-label="Open navigation menu"
+          {/* Profile / Login */}
+          {MOCK_IS_LOGGED_IN ? (
+            <Link
+              href="/customer/profile"
+              aria-label="Profil saya"
+              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-white/20 font-[family-name:var(--font-body)] text-sm font-semibold text-white ring-2 ring-white/30 transition-shadow hover:ring-white/60"
             >
-            <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
+              {MOCK_AVATAR_INITIAL}
+            </Link>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="whitespace-nowrap rounded-full bg-white px-4 py-2 font-[family-name:var(--font-body)] text-sm font-semibold text-[#3991FA] transition-colors hover:bg-white/90"
             >
-                <line x1="4" y1="6" x2="20" y2="6" />
-                <line x1="4" y1="12" x2="20" y2="12" />
-                <line x1="4" y1="18" x2="20" y2="18" />
-            </svg>
-            </button>
+              Login / Sign Up
+            </Link>
+          )}
         </nav>
-        </header>
-    );
-    }
+
+        {/* Mobile menu button */}
+        <button
+          type="button"
+          onClick={() => setMobileOpen((prev) => !prev)}
+          className="ml-auto flex h-9 w-9 items-center justify-center rounded-full text-white sm:hidden"
+          aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
+          aria-expanded={mobileOpen}
+        >
+          {mobileOpen ? (
+            <CloseIcon className="h-5 w-5" />
+          ) : (
+            <MenuIcon className="h-5 w-5" />
+          )}
+        </button>
+      </div>
+
+      {/* Search — mobile row */}
+      <div className="px-4 pb-3 sm:hidden">
+        <label className="relative block w-full">
+          <span className="sr-only">Cari produk atau Kongsi</span>
+
+          <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7876]" />
+
+          <input
+            type="search"
+            placeholder="Cari produk atau Kongsi..."
+            className="w-full rounded-full border border-transparent bg-white py-2.5 pl-10 pr-4 font-[family-name:var(--font-body)] text-sm text-[#292828] placeholder:text-[#B3B0AE] outline-none transition-shadow focus:ring-4 focus:ring-white/40"
+          />
+        </label>
+      </div>
+
+      {/* Mobile dropdown menu */}
+      {mobileOpen && (
+        <nav className="flex flex-col gap-1 border-t border-white/15 bg-[#3991FA] px-4 pb-4 pt-2 sm:hidden">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileOpen(false)}
+              className={[
+                "rounded-xl px-3 py-2.5 font-[family-name:var(--font-body)] text-[15px] font-semibold text-white/90 transition-colors",
+                isActive(link.href)
+                  ? "bg-white/15 text-white"
+                  : "hover:bg-white/10",
+              ].join(" ")}
+            >
+              {link.label}
+            </Link>
+          ))}
+
+          <Link
+            href="/customer/notifications"
+            onClick={() => setMobileOpen(false)}
+            className={[
+              "rounded-xl px-3 py-2.5 font-[family-name:var(--font-body)] text-[15px] font-semibold text-white/90 transition-colors",
+              isActive("/customer/notifications")
+                ? "bg-white/15 text-white"
+                : "hover:bg-white/10",
+            ].join(" ")}
+          >
+            Notifikasi
+          </Link>
+
+          {MOCK_IS_LOGGED_IN ? (
+            <Link
+              href="/customer/profile"
+              onClick={() => setMobileOpen(false)}
+              className="mt-1 flex items-center gap-2.5 rounded-xl px-3 py-2.5 font-[family-name:var(--font-body)] text-[15px] font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-xs font-semibold ring-2 ring-white/30">
+                {MOCK_AVATAR_INITIAL}
+              </span>
+
+              Profil saya
+            </Link>
+          ) : (
+            <Link
+              href="/auth/login"
+              onClick={() => setMobileOpen(false)}
+              className="mt-1 rounded-xl bg-white px-3 py-2.5 text-center font-[family-name:var(--font-body)] text-[15px] font-semibold text-[#3991FA]"
+            >
+              Login / Sign Up
+            </Link>
+          )}
+        </nav>
+      )}
+    </header>
+  );
+}
