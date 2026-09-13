@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { GroupDeal } from "@/lib/customerMockData";
 import { formatRupiah } from "@/lib/customerMockData";
 import ProgressBar from "./ProgressBar";
@@ -18,7 +19,10 @@ export default function DealCard({
     highlight || deal.currentParticipants >= deal.targetParticipants - 2;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#E4E1DF] bg-white transition-shadow hover:shadow-[0_4px_16px_rgba(41,40,40,0.08)]">
+    <Link
+      href={`/kongsi/${deal.id}`}
+      className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#E4E1DF] bg-white transition-shadow hover:shadow-[0_4px_16px_rgba(41,40,40,0.08)]"
+    >
       {/* Image placeholder */}
       <div
         className="flex aspect-[4/3] w-full items-center justify-center bg-cover bg-center bg-[#F1EFEF] text-5xl"
@@ -53,6 +57,7 @@ export default function DealCard({
           <span className="text-xs text-[#7A7876] line-through">
             {formatRupiah(deal.normalPrice)}
           </span>
+
           <span
             className="text-base font-bold text-[#3991FA]"
             style={{ fontFamily: "var(--font-heading)" }}
@@ -66,11 +71,12 @@ export default function DealCard({
             current={deal.currentParticipants}
             target={deal.targetParticipants}
           />
+
           <div className="flex items-center justify-between text-xs text-[#7A7876]">
             <span>
-              {deal.currentParticipants}/{deal.targetParticipants} orang sudah
-              ikut
+              {deal.currentParticipants}/{deal.targetParticipants} orang sudah ikut
             </span>
+
             {variant !== "nearby" && (
               <span className="flex items-center gap-1">
                 <ClockIcon className="h-3.5 w-3.5" />
@@ -86,6 +92,6 @@ export default function DealCard({
           </span>
         )}
       </div>
-    </div>
+    </Link>
   );
 }

@@ -51,7 +51,6 @@ export interface ActiveKongsi {
   id: string;
   name: string;
   imageEmoji: string;
-  imageUrl?: string;
   normalPrice: number;
   kongsiPrice: number;
   currentParticipants: number;

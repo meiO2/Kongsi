@@ -2,11 +2,7 @@
 // No backend calls — everything here is hardcoded for demonstration and is
 // designed to be easy to swap for real API data later.
 
-export type KongsiStatus =
-  | "berlangsung"
-  | "sukses"
-  | "selesai"
-  | "tidak-berhasil";
+export type KongsiStatus = "berlangsung" | "sukses" | "selesai" | "tidak-berhasil";
 
 export type KongsiCategory = "Kuliner" | "Kerajinan" | "Fashion" | "Lainnya";
 
@@ -19,10 +15,7 @@ export const KONGSI_STATUS_LABEL: Record<KongsiStatus, string> = {
   "tidak-berhasil": "Tidak Berhasil",
 };
 
-export const KONGSI_FILTERS: {
-  value: KongsiStatus | "semua";
-  label: string;
-}[] = [
+export const KONGSI_FILTERS: { value: KongsiStatus | "semua"; label: string }[] = [
   { value: "semua", label: "Semua" },
   { value: "berlangsung", label: "Sedang Berlangsung" },
   { value: "sukses", label: "Target Tercapai" },
@@ -35,7 +28,6 @@ export interface KongsiDeal {
   name: string;
   description: string;
   imageEmoji: string;
-  imageUrl?: string;
   category: KongsiCategory;
   normalPrice: number;
   kongsiPrice: number;
@@ -71,8 +63,7 @@ export const KONGSI_DEALS: KongsiDeal[] = [
   {
     id: "ks-002",
     name: "Keripik Singkong Pedas",
-    description:
-      "Keripik singkong renyah dengan bumbu pedas manis, dikemas higienis.",
+    description: "Keripik singkong renyah dengan bumbu pedas manis, dikemas higienis.",
     imageEmoji: "🥔",
     category: "Kuliner",
     normalPrice: 12000,
@@ -88,8 +79,7 @@ export const KONGSI_DEALS: KongsiDeal[] = [
   {
     id: "ks-003",
     name: "Es Teh Manis Botolan",
-    description:
-      "Es teh manis segar dalam kemasan botol 500ml, cocok untuk cuaca panas.",
+    description: "Es teh manis segar dalam kemasan botol 500ml, cocok untuk cuaca panas.",
     imageEmoji: "🧋",
     category: "Kuliner",
     normalPrice: 8000,
@@ -104,8 +94,7 @@ export const KONGSI_DEALS: KongsiDeal[] = [
   {
     id: "ks-004",
     name: "Sabun Herbal Sereh",
-    description:
-      "Sabun batang herbal dengan ekstrak sereh, cocok untuk kulit sensitif.",
+    description: "Sabun batang herbal dengan ekstrak sereh, cocok untuk kulit sensitif.",
     imageEmoji: "🧼",
     category: "Lainnya",
     normalPrice: 18000,
@@ -137,8 +126,7 @@ export const KONGSI_DEALS: KongsiDeal[] = [
   {
     id: "ks-006",
     name: "Anyaman Tas Rotan",
-    description:
-      "Tas rotan anyaman tangan, ringan dan tahan lama untuk belanja harian.",
+    description: "Tas rotan anyaman tangan, ringan dan tahan lama untuk belanja harian.",
     imageEmoji: "🧺",
     category: "Kerajinan",
     normalPrice: 85000,
@@ -153,12 +141,7 @@ export const KONGSI_DEALS: KongsiDeal[] = [
   },
 ];
 
-export const KONGSI_CATEGORIES: KongsiCategory[] = [
-  "Kuliner",
-  "Kerajinan",
-  "Fashion",
-  "Lainnya",
-];
+export const KONGSI_CATEGORIES: KongsiCategory[] = ["Kuliner", "Kerajinan", "Fashion", "Lainnya"];
 
 export function getKongsiById(id: string): KongsiDeal | undefined {
   return KONGSI_DEALS.find((deal) => deal.id === id);

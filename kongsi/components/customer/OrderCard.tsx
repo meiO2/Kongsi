@@ -1,10 +1,12 @@
-import type { Order } from "@/lib/customerMockData";
+import Link from "next/link";
+import { getReviewForOrder, type Order } from "@/lib/customerMockData";
 import ProgressBar from "./ProgressBar";
 
 const STATUS_STYLES: Record<Order["status"], string> = {
   berlangsung: "bg-[#3991FA]/10 text-[#3991FA]",
   sukses: "bg-[#1FA971]/10 text-[#1FA971]",
   gagal: "bg-[#E14B4B]/10 text-[#E14B4B]",
+  selesai: "bg-[#7A7876]/10 text-[#7A7876]",
 };
 
 export default function OrderCard({ order }: { order: Order }) {
@@ -56,6 +58,15 @@ export default function OrderCard({ order }: { order: Order }) {
           >
             {order.helperLabel}
           </p>
+        )}
+
+        {order.status === "selesai" && (
+          <Link
+            href={`/rating/${order.id}`}
+            className="mt-1 flex w-fit items-center justify-center rounded-xl border border-[#3991FA]/30 px-4 py-2 text-sm font-semibold text-[#3991FA] transition-colors hover:bg-[#3991FA]/[0.06]"
+          >
+            {getReviewForOrder(order.id) ? "Lihat Ulasan" : "Beri Rating"}
+          </Link>
         )}
       </div>
     </div>
