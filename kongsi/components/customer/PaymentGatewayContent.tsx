@@ -1,17 +1,119 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Script from "next/script";
 import { formatRupiah } from "@/lib/customerMockData";
 import { CheckCircleIcon, ClockIcon } from "@/components/customer/icons";
+
+type SnapCallbacks = {
+  onSuccess: () => void;
+  onPending: () => void;
+  onError: () => void;
+};
+
+declare global {
+  interface Window {
+    snap?: {
+      pay: (token: string, callbacks: SnapCallbacks) => void;
+    };
+  }
+}
 
 export default function PaymentGatewayContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [result, setResult] = useState<"pending" | "success" | "failed">("pending");
+  const [result, setResult] = useState<"pending" | "success" | "failed">(
+    "pending",
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
 
   const order = searchParams.get("order") ?? "KS001";
+  const orderId = searchParams.get("orderId");
+  const paymentMethod = searchParams.get("paymentMethod");
   const total = Number(searchParams.get("total") ?? 0);
+
+  useEffect(() => {
+    if (!orderId || result === "success") return;
+    let active = true;
+    const checkPayment = async () => {
+      const response = await fetch(
+        `/api/payment?orderId=${encodeURIComponent(orderId)}`,
+      );
+      if (!response.ok || !active) return;
+      const body = (await response.json()) as {
+        payment_status?: string;
+        participation_id?: string;
+      };
+      if (body.payment_status === "paid" && body.participation_id) {
+        setResult("success");
+        setProcessing(false);
+      }
+    };
+    const interval = window.setInterval(checkPayment, 3000);
+    checkPayment();
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, [orderId, result]);
+
+  async function startPayment() {
+    if (!orderId || !paymentMethod) {
+      setError("Data pembayaran tidak lengkap.");
+      setResult("failed");
+      return;
+    }
+
+    setProcessing(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, paymentMethod }),
+      });
+      const body = (await response.json()) as {
+        error?: string;
+        token?: string;
+        redirectUrl?: string;
+      };
+      if (!response.ok || !body.token) {
+        throw new Error(body.error ?? "Transaksi Midtrans gagal dibuat.");
+      }
+
+      if (window.snap) {
+        window.snap.pay(body.token, {
+          onSuccess: async () => {
+            setError("Pembayaran berhasil. Mengonfirmasi pesanan...");
+            await fetch(`/api/payment?orderId=${encodeURIComponent(orderId)}`);
+          },
+          onPending: () => {
+            setProcessing(false);
+            setError("Pembayaran masih menunggu konfirmasi Midtrans.");
+          },
+          onError: () => {
+            setProcessing(false);
+            setError("Pembayaran gagal diproses oleh Midtrans.");
+            setResult("failed");
+          },
+        });
+      } else if (body.redirectUrl) {
+        window.location.href = body.redirectUrl;
+      } else {
+        throw new Error("Snap Midtrans belum siap.");
+      }
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Transaksi Midtrans gagal dibuat.",
+      );
+      setResult("failed");
+      setProcessing(false);
+    }
+  }
 
   if (result === "success") {
     return (
@@ -52,7 +154,8 @@ export default function PaymentGatewayContent() {
           Pembayaran Gagal
         </h1>
         <p className="text-sm text-[#7A7876]">
-          Terjadi kendala saat memproses pembayaran untuk pesanan #{order}.
+          {error ??
+            `Terjadi kendala saat memproses pembayaran untuk pesanan #${order}.`}
         </p>
         <button
           type="button"
@@ -67,6 +170,15 @@ export default function PaymentGatewayContent() {
 
   return (
     <div className="mx-auto flex w-full max-w-[420px] flex-col gap-6 px-4 pb-20 pt-12 sm:px-6">
+      <Script
+        src={
+          process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true"
+            ? "https://app.midtrans.com/snap/snap.js"
+            : "https://app.sandbox.midtrans.com/snap/snap.js"
+        }
+        data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+        strategy="afterInteractive"
+      />
       <div className="flex flex-col items-center gap-2 text-center">
         <h1
           className="text-xl font-bold text-[#292828]"
@@ -75,7 +187,7 @@ export default function PaymentGatewayContent() {
           Payment Gateway
         </h1>
         <p className="text-sm text-[#7A7876]">
-          Halaman ini hanya simulasi — belum terhubung ke payment gateway sungguhan.
+          Pembayaran diproses aman melalui Midtrans.
         </p>
       </div>
 
@@ -94,25 +206,22 @@ export default function PaymentGatewayContent() {
           </span>
         </div>
         <p className="border-t border-[#F1EFEF] pt-3 text-xs text-[#7A7876]">
-          Choose your payment method — simulasi status berikut ini:
+          Kamu akan diarahkan ke halaman pembayaran Midtrans.
         </p>
 
         <div className="flex flex-col gap-2">
           <button
             type="button"
-            onClick={() => setResult("success")}
+            onClick={startPayment}
+            disabled={processing}
             className="flex w-full items-center justify-center rounded-2xl bg-[#3991FA] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#2B7FE0]"
           >
-            Simulasikan Pembayaran Berhasil
-          </button>
-          <button
-            type="button"
-            onClick={() => setResult("failed")}
-            className="flex w-full items-center justify-center rounded-2xl border border-[#E14B4B]/30 py-3 text-sm font-semibold text-[#E14B4B] transition-colors hover:bg-[#E14B4B]/[0.06]"
-          >
-            Simulasikan Pembayaran Gagal
+            {processing
+              ? "Menghubungkan ke Midtrans..."
+              : "Bayar dengan Midtrans"}
           </button>
         </div>
+        {error && <p className="text-sm text-[#E14B4B]">{error}</p>}
       </div>
     </div>
   );

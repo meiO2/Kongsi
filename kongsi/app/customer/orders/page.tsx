@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import OrderCard from "@/components/customer/OrderCard";
-import { ORDERS, type OrderStatus } from "@/lib/customerMockData";
+import { type Order, type OrderStatus } from "@/lib/customerMockData";
 
 const TABS: { value: OrderStatus; label: string }[] = [
   { value: "berlangsung", label: "Sedang Berlangsung" },
@@ -12,8 +12,76 @@ const TABS: { value: OrderStatus; label: string }[] = [
 
 export default function OrdersPage() {
   const [activeTab, setActiveTab] = useState<OrderStatus>("berlangsung");
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredOrders = ORDERS.filter((order) => order.status === activeTab);
+  useEffect(() => {
+    async function loadOrders() {
+      try {
+        const response = await fetch("/api/orders");
+        const result = (await response.json()) as
+          | Array<Record<string, string | number | null>>
+          | { error?: string };
+        if (!response.ok || !Array.isArray(result)) {
+          throw new Error(
+            "error" in result ? result.error : "Pesanan gagal dimuat.",
+          );
+        }
+        setOrders(
+          result.map((order) => {
+            const currentParticipants = Number(order.participants_after ?? 0);
+            const targetParticipants = Number(order.target_participants ?? 1);
+            const status =
+              currentParticipants >= targetParticipants
+                ? "sukses"
+                : "berlangsung";
+            return {
+              id: String(order.id),
+              orderNumber: String(order.order_number),
+              dealId: String(order.group_deal_id),
+              sellerId: String(order.owner_id),
+              dealName: String(order.product_name),
+              seller: "UMKM lokal",
+              currentParticipants,
+              targetParticipants,
+              status,
+              statusLabel:
+                status === "sukses"
+                  ? "Kongsi Berhasil"
+                  : "Menunggu Kongsi Berhasil",
+              helperLabel:
+                status === "sukses"
+                  ? "Pesanan sedang diproses UMKM."
+                  : `Tinggal ${Math.max(0, targetParticipants - currentParticipants)} orang lagi!`,
+              imageEmoji: "🛍️",
+              quantity: Number(order.quantity),
+              unitPrice: Number(order.unit_price),
+              fulfillment: order.fulfillment as "pickup" | "delivery",
+              pickupLocation: order.pickup_location
+                ? String(order.pickup_location)
+                : undefined,
+              pickupHours: order.pickup_hours
+                ? String(order.pickup_hours)
+                : undefined,
+              deliveryFee: Number(order.delivery_fee ?? 0),
+            };
+          }),
+        );
+      } catch (requestError) {
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Pesanan gagal dimuat.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadOrders();
+  }, []);
+
+  const filteredOrders = orders.filter((order) => order.status === activeTab);
 
   return (
     <main className="mx-auto flex w-full max-w-[900px] flex-col gap-6 px-4 pb-20 pt-8 sm:px-6">
@@ -45,11 +113,19 @@ export default function OrdersPage() {
 
       {/* Order list */}
       <div className="flex flex-col gap-3">
-        {filteredOrders.length > 0 ? (
-          filteredOrders.map((order) => <OrderCard key={order.id} order={order} />)
+        {loading ? (
+          <p className="text-sm text-[#7A7876]">Memuat pesanan...</p>
+        ) : error ? (
+          <p className="text-sm text-[#E14B4B]">{error}</p>
+        ) : filteredOrders.length > 0 ? (
+          filteredOrders.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))
         ) : (
           <div className="rounded-2xl border border-dashed border-[#E4E1DF] py-14 text-center">
-            <p className="text-sm text-[#7A7876]">Belum ada pesanan di kategori ini.</p>
+            <p className="text-sm text-[#7A7876]">
+              Belum ada pesanan di kategori ini.
+            </p>
           </div>
         )}
       </div>

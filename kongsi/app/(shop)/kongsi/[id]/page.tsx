@@ -5,10 +5,10 @@ import CountdownTimer from "@/components/customer/CountdownTimer";
 import SellerRating from "@/components/customer/SellerRating";
 import {
   formatRupiah,
-  getDealById,
   getDealStatus,
   getSellerById,
 } from "@/lib/customerMockData";
+import { getCustomerGroupDealById } from "@/lib/customerGroupDeals";
 
 export default async function DealDetailPage({
   params,
@@ -16,7 +16,7 @@ export default async function DealDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const deal = getDealById(id);
+  const deal = await getCustomerGroupDealById(id);
 
   if (!deal) {
     notFound();
@@ -25,11 +25,15 @@ export default async function DealDetailPage({
   const seller = getSellerById(deal.sellerId);
   const status = getDealStatus(deal);
   const remaining = deal.targetParticipants - deal.currentParticipants;
-  const isAlmostThere = status === "berlangsung" && remaining <= 2 && remaining > 0;
+  const isAlmostThere =
+    status === "berlangsung" && remaining <= 2 && remaining > 0;
 
   return (
     <main className="mx-auto flex w-full max-w-[880px] flex-col gap-6 px-4 pb-24 pt-8 sm:px-6">
-      <Link href="/" className="w-fit text-sm font-semibold text-[#3991FA] hover:underline">
+      <Link
+        href="/"
+        className="w-fit text-sm font-semibold text-[#3991FA] hover:underline"
+      >
         ← Kembali ke Beranda
       </Link>
 
@@ -56,7 +60,10 @@ export default async function DealDetailPage({
           </Link>
           {seller && (
             <div className="mt-1">
-              <SellerRating rating={seller.rating} reviewCount={seller.reviewCount} />
+              <SellerRating
+                rating={seller.rating}
+                reviewCount={seller.reviewCount}
+              />
             </div>
           )}
 
@@ -84,9 +91,13 @@ export default async function DealDetailPage({
             </p>
           ) : null}
 
-          <ProgressBar current={deal.currentParticipants} target={deal.targetParticipants} />
+          <ProgressBar
+            current={deal.currentParticipants}
+            target={deal.targetParticipants}
+          />
           <p className="text-sm text-[#7A7876]">
-            {deal.currentParticipants}/{deal.targetParticipants} orang sudah ikut
+            {deal.currentParticipants}/{deal.targetParticipants} orang sudah
+            ikut
           </p>
 
           {isAlmostThere && (
@@ -95,8 +106,12 @@ export default async function DealDetailPage({
             </span>
           )}
 
-          {status === "berlangsung" && <CountdownTimer timeLeft={deal.timeLeft} />}
-          {status === "berakhir" && <CountdownTimer timeLeft={deal.timeLeft} expired />}
+          {status === "berlangsung" && (
+            <CountdownTimer timeLeft={deal.timeLeft} />
+          )}
+          {status === "berakhir" && (
+            <CountdownTimer timeLeft={deal.timeLeft} expired />
+          )}
         </div>
 
         {/* Tentang Produk */}
@@ -110,7 +125,10 @@ export default async function DealDetailPage({
           <p className="mt-2 text-sm text-[#7A7876]">{deal.description}</p>
           <ul className="mt-3 flex flex-col gap-1.5">
             {deal.details.map((detail) => (
-              <li key={detail} className="flex items-center gap-2 text-sm text-[#292828]">
+              <li
+                key={detail}
+                className="flex items-center gap-2 text-sm text-[#292828]"
+              >
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#3991FA]" />
                 {detail}
               </li>
@@ -127,21 +145,33 @@ export default async function DealDetailPage({
             Pemenuhan Pesanan
           </h2>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-            {(deal.fulfillment === "pickup" || deal.fulfillment === "pickup-delivery") && (
+            {(deal.fulfillment === "pickup" ||
+              deal.fulfillment === "pickup-delivery") && (
               <div className="flex flex-1 items-start gap-2.5 rounded-2xl border border-[#E4E1DF] p-4">
-                <span aria-hidden className="text-lg">📍</span>
+                <span aria-hidden className="text-lg">
+                  📍
+                </span>
                 <div>
-                  <p className="text-sm font-semibold text-[#292828]">Ambil di tempat</p>
-                  <p className="mt-0.5 text-sm text-[#7A7876]">{deal.pickupLocation}</p>
+                  <p className="text-sm font-semibold text-[#292828]">
+                    Ambil di tempat
+                  </p>
+                  <p className="mt-0.5 text-sm text-[#7A7876]">
+                    {deal.pickupLocation}
+                  </p>
                   <p className="text-sm text-[#7A7876]">{deal.pickupHours}</p>
                 </div>
               </div>
             )}
-            {(deal.fulfillment === "delivery" || deal.fulfillment === "pickup-delivery") && (
+            {(deal.fulfillment === "delivery" ||
+              deal.fulfillment === "pickup-delivery") && (
               <div className="flex flex-1 items-start gap-2.5 rounded-2xl border border-[#E4E1DF] p-4">
-                <span aria-hidden className="text-lg">🚚</span>
+                <span aria-hidden className="text-lg">
+                  🚚
+                </span>
                 <div>
-                  <p className="text-sm font-semibold text-[#292828]">Pengiriman</p>
+                  <p className="text-sm font-semibold text-[#292828]">
+                    Pengiriman
+                  </p>
                   <p className="mt-0.5 text-sm text-[#7A7876]">
                     Biaya pengiriman {formatRupiah(deal.deliveryFee ?? 0)}
                   </p>
@@ -164,7 +194,8 @@ export default async function DealDetailPage({
 
           {status === "sukses" && (
             <div className="rounded-2xl bg-[#1FA971]/10 px-5 py-4 text-center text-sm font-semibold text-[#1FA971]">
-              🎉 Kongsi ini sudah mencapai target dan tidak menerima peserta baru.
+              🎉 Kongsi ini sudah mencapai target dan tidak menerima peserta
+              baru.
             </div>
           )}
 

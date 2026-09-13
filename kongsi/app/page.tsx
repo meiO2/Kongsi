@@ -31,6 +31,10 @@ interface CustomerDealResponse {
   target_participants: number;
   deadline: string;
   category: string;
+  fulfillment: GroupDeal["fulfillment"];
+  pickup_hours: string | null;
+  delivery_fee: number;
+  owner_id: string;
   pickup_location: string | null;
   seller: string;
   image_emoji: string;
@@ -62,6 +66,7 @@ export default function CustomerHomePage() {
             id: deal.id,
             name: deal.product_name,
             seller: deal.seller,
+            sellerId: deal.owner_id,
             normalPrice: deal.normal_price,
             kongsiPrice: deal.kongsi_price,
             currentParticipants: deal.current_participants,
@@ -72,6 +77,12 @@ export default function CustomerHomePage() {
             imageUrl: deal.image_url ?? undefined,
             locationLabel: deal.pickup_location ?? undefined,
             category: deal.category,
+            description: deal.description,
+            details: [deal.category],
+            fulfillment: deal.fulfillment,
+            pickupLocation: deal.pickup_location ?? undefined,
+            pickupHours: deal.pickup_hours ?? undefined,
+            deliveryFee: deal.delivery_fee,
           })),
         );
       } catch (error) {

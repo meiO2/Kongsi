@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import OrderDetailView from "@/components/umkm/OrderDetailView";
-import { getOrderById } from "@/lib/orderMockData";
+import { getUmkmOrderByNumber } from "@/lib/umkmOrders";
 
 export default async function PesananDetailPage({
   params,
@@ -8,7 +8,7 @@ export default async function PesananDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const order = getOrderById(id);
+  const order = await getUmkmOrderByNumber(id);
 
   if (!order) {
     notFound();

@@ -121,6 +121,8 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
       }
 
       if (authData.user) {
+        const destination =
+          authData.user.user_metadata?.accountType === "umkm" ? "/umkm" : "/";
         const metadata = authData.user.user_metadata || {};
         const isUmkm =
           metadata.accountType === "umkm" ||

@@ -6,7 +6,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from("group_deals")
     .select(
-      "id, product_name, description, image_url, normal_price, kongsi_price, current_participants, target_participants, deadline, category, pickup_location, status",
+      "id, product_name, description, image_url, normal_price, kongsi_price, current_participants, target_participants, deadline, category, fulfillment, pickup_location, pickup_hours, delivery_fee, owner_id, status",
     )
     .eq("status", "berlangsung")
     .order("created_at", { ascending: false });

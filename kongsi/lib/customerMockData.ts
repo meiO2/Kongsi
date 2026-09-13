@@ -43,7 +43,9 @@ export interface GroupDeal {
   timeLeft: string;
   distanceLabel?: string;
   locationLabel?: string;
+  category?: string;
   imageEmoji: string;
+  imageUrl?: string;
   description: string;
   details: string[];
   fulfillment: FulfillmentMethod;
@@ -91,7 +93,8 @@ export const RECOMMENDED_DEALS: GroupDeal[] = [
     remainingLabel: "Tinggal 10 orang lagi!",
     timeLeft: "11:40:05",
     imageEmoji: "👕",
-    description: "Kaos katun combed 30s, nyaman dipakai harian, tersedia beberapa warna.",
+    description:
+      "Kaos katun combed 30s, nyaman dipakai harian, tersedia beberapa warna.",
     details: ["Bahan katun combed 30s", "Unisex", "Ukuran S–XL"],
     fulfillment: "delivery",
     deliveryFee: 12000,
@@ -108,7 +111,8 @@ export const RECOMMENDED_DEALS: GroupDeal[] = [
     remainingLabel: "Tinggal 2 orang lagi!",
     timeLeft: "05:22:10",
     imageEmoji: "🧺",
-    description: "Tas rotan anyaman tangan, ringan dan tahan lama untuk belanja harian.",
+    description:
+      "Tas rotan anyaman tangan, ringan dan tahan lama untuk belanja harian.",
     details: ["Anyaman tangan", "Tahan lama", "Muat untuk belanja harian"],
     fulfillment: "pickup",
     pickupLocation: "Kriya Ibu Sari",
@@ -126,7 +130,8 @@ export const RECOMMENDED_DEALS: GroupDeal[] = [
     remainingLabel: "Tinggal 8 orang lagi!",
     timeLeft: "08:05:30",
     imageEmoji: "🧼",
-    description: "Sabun batang herbal dengan ekstrak sereh, cocok untuk kulit sensitif.",
+    description:
+      "Sabun batang herbal dengan ekstrak sereh, cocok untuk kulit sensitif.",
     details: ["Ekstrak sereh alami", "Cocok kulit sensitif", "Bebas paraben"],
     fulfillment: "pickup-delivery",
     pickupLocation: "Griya Sehat Alami",
@@ -145,7 +150,8 @@ export const RECOMMENDED_DEALS: GroupDeal[] = [
     remainingLabel: "Tinggal 1 orang lagi!",
     timeLeft: "01:45:00",
     imageEmoji: "🥔",
-    description: "Keripik singkong renyah dengan bumbu pedas manis, dikemas higienis.",
+    description:
+      "Keripik singkong renyah dengan bumbu pedas manis, dikemas higienis.",
     details: ["Renyah tahan lama", "Level pedas sedang", "Kemasan higienis"],
     fulfillment: "pickup",
     pickupLocation: "Warung Renyah Jaya",
@@ -202,7 +208,8 @@ export const ALMOST_THERE_DEALS: GroupDeal[] = [
     remainingLabel: "Tinggal 1 orang lagi!",
     timeLeft: "01:45:00",
     imageEmoji: "🥔",
-    description: "Keripik singkong renyah dengan bumbu pedas manis, dikemas higienis.",
+    description:
+      "Keripik singkong renyah dengan bumbu pedas manis, dikemas higienis.",
     details: ["Renyah tahan lama", "Level pedas sedang", "Kemasan higienis"],
     fulfillment: "pickup",
     pickupLocation: "Warung Renyah Jaya",
@@ -220,7 +227,8 @@ export const ALMOST_THERE_DEALS: GroupDeal[] = [
     remainingLabel: "Tinggal 1 orang lagi!",
     timeLeft: "04:05:00",
     imageEmoji: "🧺",
-    description: "Tas rotan anyaman tangan, ringan dan tahan lama untuk belanja harian.",
+    description:
+      "Tas rotan anyaman tangan, ringan dan tahan lama untuk belanja harian.",
     details: ["Anyaman tangan", "Tahan lama", "Muat untuk belanja harian"],
     fulfillment: "pickup",
     pickupLocation: "Kriya Ibu Sari",
@@ -244,7 +252,11 @@ export const NEARBY_DEALS: GroupDeal[] = [
     locationLabel: "Cipondoh, Tangerang",
     imageEmoji: "🍲",
     description: "Seblak kuah pedas dengan kerupuk basah, ceker, dan telur.",
-    details: ["Level pedas bisa disesuaikan", "Ceker & telur", "Porsi mengenyangkan"],
+    details: [
+      "Level pedas bisa disesuaikan",
+      "Ceker & telur",
+      "Porsi mengenyangkan",
+    ],
     fulfillment: "pickup",
     pickupLocation: "Warung Teh Nia",
     pickupHours: "16.00–21.00",
@@ -307,7 +319,8 @@ export const EXTRA_DEALS: GroupDeal[] = [
     remainingLabel: "Target tercapai!",
     timeLeft: "00:00:00",
     imageEmoji: "🧼",
-    description: "Sabun batang herbal dengan ekstrak sereh, cocok untuk kulit sensitif.",
+    description:
+      "Sabun batang herbal dengan ekstrak sereh, cocok untuk kulit sensitif.",
     details: ["Ekstrak sereh alami", "Cocok kulit sensitif", "Bebas paraben"],
     fulfillment: "pickup-delivery",
     pickupLocation: "Griya Sehat Alami",
@@ -380,7 +393,8 @@ export const SELLERS: Seller[] = [
     avatarEmoji: "👕",
     rating: 4.6,
     reviewCount: 38,
-    description: "Konveksi rumahan yang memproduksi pakaian katun berkualitas dengan harga bersaing.",
+    description:
+      "Konveksi rumahan yang memproduksi pakaian katun berkualitas dengan harga bersaing.",
     address: "Karawaci, Tangerang",
   },
   {
@@ -390,7 +404,8 @@ export const SELLERS: Seller[] = [
     avatarEmoji: "🧺",
     rating: 4.9,
     reviewCount: 56,
-    description: "Pengrajin anyaman rotan dan bambu, membuat setiap produk secara handmade.",
+    description:
+      "Pengrajin anyaman rotan dan bambu, membuat setiap produk secara handmade.",
     address: "Periuk, Tangerang",
   },
   {
@@ -400,7 +415,8 @@ export const SELLERS: Seller[] = [
     avatarEmoji: "🧼",
     rating: 4.7,
     reviewCount: 91,
-    description: "Memproduksi sabun dan produk perawatan tubuh herbal dari bahan alami pilihan.",
+    description:
+      "Memproduksi sabun dan produk perawatan tubuh herbal dari bahan alami pilihan.",
     address: "Cibodas, Tangerang",
   },
   {
@@ -410,7 +426,8 @@ export const SELLERS: Seller[] = [
     avatarEmoji: "🥔",
     rating: 4.5,
     reviewCount: 67,
-    description: "Produsen keripik dan camilan rumahan dengan berbagai varian rasa.",
+    description:
+      "Produsen keripik dan camilan rumahan dengan berbagai varian rasa.",
     address: "Periuk, Tangerang",
   },
   {
@@ -420,7 +437,8 @@ export const SELLERS: Seller[] = [
     avatarEmoji: "🧵",
     rating: 4.9,
     reviewCount: 22,
-    description: "Pengrajin batik tulis tradisional dengan motif klasik Nusantara.",
+    description:
+      "Pengrajin batik tulis tradisional dengan motif klasik Nusantara.",
     address: "Karawaci, Tangerang",
   },
   {
@@ -430,7 +448,8 @@ export const SELLERS: Seller[] = [
     avatarEmoji: "🍲",
     rating: null,
     reviewCount: 0,
-    description: "Warung seblak dan camilan pedas legendaris di lingkungan Cipondoh.",
+    description:
+      "Warung seblak dan camilan pedas legendaris di lingkungan Cipondoh.",
     address: "Cipondoh, Tangerang",
   },
   {
@@ -450,7 +469,10 @@ export function getSellerById(id: string): Seller | undefined {
 }
 
 export function getDealsBySeller(sellerId: string): GroupDeal[] {
-  return ALL_DEALS.filter((deal) => deal.sellerId === sellerId && getDealStatus(deal) === "berlangsung");
+  return ALL_DEALS.filter(
+    (deal) =>
+      deal.sellerId === sellerId && getDealStatus(deal) === "berlangsung",
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -688,7 +710,8 @@ export const NOTIFICATIONS: NotificationItem[] = [
     id: "notif-2",
     type: "siap-diambil",
     title: "Pesanan siap diambil",
-    description: "Keripik Singkong Pedas sudah bisa diambil di Warung Renyah Jaya.",
+    description:
+      "Keripik Singkong Pedas sudah bisa diambil di Warung Renyah Jaya.",
     time: "09:02",
     group: "Hari ini",
     unread: true,
@@ -724,7 +747,8 @@ export const NOTIFICATIONS: NotificationItem[] = [
     id: "notif-6",
     type: "dikembalikan",
     title: "Pembayaran dikembalikan",
-    description: "Anyaman Tas Rotan tidak mencapai target. Dana sudah dikembalikan.",
+    description:
+      "Anyaman Tas Rotan tidak mencapai target. Dana sudah dikembalikan.",
     time: "08:15",
     group: "Kemarin",
     unread: false,
@@ -739,8 +763,17 @@ export interface Address {
 }
 
 export const ADDRESSES: Address[] = [
-  { id: "addr-1", label: "Rumah", detail: "Jl. Contoh No. 123, Cipondoh, Tangerang", isPrimary: true },
-  { id: "addr-2", label: "Kantor", detail: "Jl. Melati Raya No. 45, Karawaci, Tangerang" },
+  {
+    id: "addr-1",
+    label: "Rumah",
+    detail: "Jl. Contoh No. 123, Cipondoh, Tangerang",
+    isPrimary: true,
+  },
+  {
+    id: "addr-2",
+    label: "Kantor",
+    detail: "Jl. Melati Raya No. 45, Karawaci, Tangerang",
+  },
 ];
 
 export const MOCK_PROFILE = {

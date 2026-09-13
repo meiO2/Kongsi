@@ -153,6 +153,8 @@ export default function SignUpForm() {
 
       // If Supabase has confirm email disabled, user has session immediately
       if (authData.session) {
+        const destination =
+          authData.user?.user_metadata?.accountType === "umkm" ? "/umkm" : "/";
         const metadata = authData.user?.user_metadata || {};
         const isUmkm =
           metadata.accountType === "umkm" ||

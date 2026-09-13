@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import CheckoutView from "@/components/customer/CheckoutView";
-import { getDealById, getDealStatus, getSellerById } from "@/lib/customerMockData";
+import { getDealStatus, getSellerById } from "@/lib/customerMockData";
+import { getCustomerGroupDealById } from "@/lib/customerGroupDeals";
 
 export default async function CheckoutPage({
   params,
@@ -8,7 +9,7 @@ export default async function CheckoutPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const deal = getDealById(id);
+  const deal = await getCustomerGroupDealById(id);
 
   if (!deal || getDealStatus(deal) !== "berlangsung") {
     notFound();

@@ -28,6 +28,8 @@ export async function GET(request: Request) {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+      const destination =
+        user?.user_metadata?.accountType === "umkm" ? "/umkm" : next;
       const metadata = user?.user_metadata || {};
       const isUmkm =
         metadata.accountType === "umkm" ||
