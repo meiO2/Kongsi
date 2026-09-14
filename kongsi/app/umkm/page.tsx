@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
 import OverviewCard from "@/components/umkm/OverviewCard";
 import ActiveKongsiCard from "@/components/umkm/ActiveKongsiCard";
 import SalesChart from "@/components/umkm/SalesChart";
 import MobileCreateKongsiButton from "@/components/umkm/MobileCreateKongsiButton";
+import ActionRow from "@/components/umkm/ActionRow";
 import { PlusIcon } from "@/components/umkm/icons";
 import type {
   ActiveKongsi,
   OverviewMetric,
   SalesDataPoint,
-} from "@/lib/umkmMockData";
+} from "@/lib/umkmData";
 
 interface DashboardDeal {
   id: string;
@@ -23,6 +23,7 @@ interface DashboardDeal {
   current_participants: number;
   target_participants: number;
   deadline: string;
+  deadline_at: string;
   status: "berlangsung" | "sukses" | "selesai" | "tidak-berhasil";
 }
 
@@ -37,10 +38,10 @@ const EMPTY_SALES: SalesDataPoint[] = [
 ];
 
 const formatRupiah = (value: number) => `Rp${value.toLocaleString("id-ID")}`;
-const supabase = createClient();
-
 export default function UmkmDashboardPage() {
   const [deals, setDeals] = useState<DashboardDeal[]>([]);
+  const [salesData, setSalesData] = useState<SalesDataPoint[]>(EMPTY_SALES);
+  const [dashboard, setDashboard] = useState({ activeDeals: 0, expiringDeals: 0, ordersToProcess: 0, readyOrders: 0, salesToday: 0, salesThisMonth: 0, buyersThisMonth: 0, successfulDeals: 0 });
   const [businessName, setBusinessName] = useState("UMKM");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,20 +49,14 @@ export default function UmkmDashboardPage() {
   useEffect(() => {
     async function loadDashboard() {
       try {
-        const response = await fetch("/api/group-deals");
+        const response = await fetch("/api/umkm/dashboard");
         const result = await response.json();
         if (!response.ok)
           throw new Error(result.error ?? "Dashboard gagal dimuat.");
-        setDeals(result);
-
-        const { data: userData } = await supabase.auth.getUser();
-        const user = userData.user;
-        setBusinessName(
-          user?.user_metadata?.businessName ||
-            user?.user_metadata?.name ||
-            user?.email ||
-            "UMKM",
-        );
+        setDeals(result.deals);
+        setDashboard(result.metrics);
+        setSalesData(result.salesLast7Days);
+        setBusinessName(result.businessName ?? "UMKM");
       } catch (loadError) {
         setError(
           loadError instanceof Error
@@ -77,38 +72,33 @@ export default function UmkmDashboardPage() {
   }, []);
 
   const activeDeals = deals.filter((deal) => deal.status === "berlangsung");
-  const successfulDeals = deals.filter(
-    (deal) => deal.status === "sukses",
-  ).length;
   const overviewMetrics: OverviewMetric[] = [
     {
       id: "kongsi-aktif",
       label: "Kongsi Aktif",
-      value: String(activeDeals.length),
-      supportingText: "Dari backend",
+      value: String(dashboard.activeDeals),
+      supportingText: "Sedang berlangsung",
       icon: "users",
     },
     {
       id: "pesanan",
       label: "Pesanan",
-      value: "0",
-      supportingText: "Belum ada tabel pesanan",
+      value: String(dashboard.ordersToProcess),
+      supportingText: "Perlu diproses",
       icon: "bag",
     },
     {
       id: "penjualan",
       label: "Penjualan",
-      value: formatRupiah(0),
-      supportingText: "Belum ada transaksi",
+      value: formatRupiah(dashboard.salesToday),
+      supportingText: "Pesanan yang sudah dibayar",
       icon: "money",
     },
     {
       id: "pembeli",
       label: "Pembeli",
-      value: String(
-        deals.reduce((total, deal) => total + deal.current_participants, 0),
-      ),
-      supportingText: "Total peserta Kongsi",
+      value: String(dashboard.buyersThisMonth),
+      supportingText: "Bulan ini",
       icon: "buyers",
     },
   ];
@@ -123,6 +113,7 @@ export default function UmkmDashboardPage() {
     targetParticipants: deal.target_participants,
     remainingLabel: `Tinggal ${Math.max(0, deal.target_participants - deal.current_participants)} pembeli lagi!`,
     timeLeft: deal.deadline,
+    deadlineAt: deal.deadline_at,
   }));
 
   return (
@@ -203,19 +194,16 @@ export default function UmkmDashboardPage() {
             </h2>
 
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <SalesStat label="Penjualan Hari Ini" value={formatRupiah(0)} />
-              <SalesStat label="Penjualan Bulan Ini" value={formatRupiah(0)} />
+              <SalesStat label="Penjualan Hari Ini" value={formatRupiah(dashboard.salesToday)} />
+              <SalesStat label="Penjualan Bulan Ini" value={formatRupiah(dashboard.salesThisMonth)} />
               <SalesStat
                 label="Kongsi Berhasil"
-                value={String(successfulDeals)}
+                value={String(dashboard.successfulDeals)}
               />
               <SalesStat
                 label="Total Pembeli"
                 value={String(
-                  deals.reduce(
-                    (total, deal) => total + deal.current_participants,
-                    0,
-                  ),
+                  dashboard.buyersThisMonth,
                 )}
               />
             </div>
@@ -224,7 +212,7 @@ export default function UmkmDashboardPage() {
               <p className="mb-2 text-sm font-medium text-[#7A7876]">
                 Penjualan 7 hari terakhir
               </p>
-              <SalesChart data={EMPTY_SALES} />
+              <SalesChart data={salesData} />
             </div>
           </section>
         </div>
@@ -239,10 +227,10 @@ export default function UmkmDashboardPage() {
           </h2>
 
           <div className="flex flex-col gap-3">
-            <p className="rounded-xl border border-dashed border-[#E4E1DF] p-4 text-sm text-[#7A7876]">
-              Pesanan dan notifikasi tindakan akan muncul setelah tabel pesanan
-              terhubung.
-            </p>
+            {dashboard.ordersToProcess > 0 && <ActionRow item={{ id: "process", message: `${dashboard.ordersToProcess} pesanan perlu diproses`, actionLabel: "Proses Pesanan", href: "/umkm/pesanan", type: "process" }} />}
+            {dashboard.readyOrders > 0 && <ActionRow item={{ id: "ready", message: `${dashboard.readyOrders} pesanan siap diambil`, actionLabel: "Lihat Pesanan", href: "/umkm/pesanan", type: "ready" }} />}
+            {dashboard.expiringDeals > 0 && <ActionRow item={{ id: "ending", message: `${dashboard.expiringDeals} Kongsi hampir berakhir`, actionLabel: "Lihat Kongsi", href: "/umkm/kongsi", type: "ending" }} />}
+            {!dashboard.ordersToProcess && !dashboard.readyOrders && !dashboard.expiringDeals && <p className="rounded-xl border border-dashed border-[#E4E1DF] p-4 text-sm text-[#7A7876]">Belum ada pesanan atau Kongsi yang memerlukan tindakan.</p>}
           </div>
         </section>
       </div>

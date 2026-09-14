@@ -1,6 +1,6 @@
 import Link from "next/link";
-import type { KongsiDeal } from "@/lib/kongsiMockData";
-import { formatRupiah } from "@/lib/kongsiMockData";
+import type { KongsiDeal } from "@/lib/kongsiData";
+import { formatRupiah } from "@/lib/kongsiData";
 import KongsiProgress from "./KongsiProgress";
 import KongsiStatusBadge from "./KongsiStatusBadge";
 
@@ -58,6 +58,7 @@ export default function KongsiCard({ deal }: { deal: KongsiDeal }) {
         current={deal.currentParticipants}
         target={deal.targetParticipants}
         timeLeft={deal.status === "berlangsung" ? deal.timeLeft : undefined}
+        deadlineAt={deal.status === "berlangsung" ? deal.deadlineAt : undefined}
       />
 
       {isAlmostThere && (

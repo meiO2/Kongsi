@@ -1,6 +1,6 @@
 "use client";
 
-import { formatRupiah } from "@/lib/customerMockData";
+import { formatRupiah } from "@/lib/customerData";
 
 export type FulfillmentChoice = "pickup" | "delivery";
 

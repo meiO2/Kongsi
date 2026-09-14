@@ -1,13 +1,15 @@
 import { ClockIcon } from "./icons";
+import LiveCountdown from "@/components/shared/LiveCountdown";
 
 interface KongsiProgressProps {
   current: number;
   target: number;
   timeLeft?: string;
+  deadlineAt?: string;
   size?: "sm" | "lg";
 }
 
-export default function KongsiProgress({ current, target, timeLeft, size = "sm" }: KongsiProgressProps) {
+export default function KongsiProgress({ current, target, timeLeft, deadlineAt, size = "sm" }: KongsiProgressProps) {
   const percent = Math.min(100, Math.round((current / target) * 100));
 
   return (
@@ -32,7 +34,12 @@ export default function KongsiProgress({ current, target, timeLeft, size = "sm" 
         {timeLeft && (
           <span className="flex items-center gap-1">
             <ClockIcon className={size === "lg" ? "h-4 w-4" : "h-3.5 w-3.5"} />
-            Berakhir dalam {timeLeft}
+            Berakhir dalam{" "}
+            {deadlineAt ? (
+              <LiveCountdown deadlineAt={deadlineAt} initialLabel={timeLeft} />
+            ) : (
+              timeLeft
+            )}
           </span>
         )}
       </div>

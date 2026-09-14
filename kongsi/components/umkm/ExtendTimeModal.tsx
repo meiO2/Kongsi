@@ -15,7 +15,7 @@ const OPTIONS: ExtendTimeOption[] = [
 
 interface ExtendTimeModalProps {
   onClose: () => void;
-  onExtend: (hours: number) => void;
+  onExtend: (hours: number) => void | Promise<void>;
 }
 
 export default function ExtendTimeModal({ onClose, onExtend }: ExtendTimeModalProps) {

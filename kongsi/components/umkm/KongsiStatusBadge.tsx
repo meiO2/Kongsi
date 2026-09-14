@@ -1,4 +1,4 @@
-import { KONGSI_STATUS_LABEL, type KongsiStatus } from "@/lib/kongsiMockData";
+import { KONGSI_STATUS_LABEL, type KongsiStatus } from "@/lib/kongsiData";
 
 const STATUS_STYLES: Record<KongsiStatus, string> = {
   berlangsung: "bg-[#3991FA]/10 text-[#3991FA]",

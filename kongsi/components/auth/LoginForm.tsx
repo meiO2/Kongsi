@@ -94,45 +94,43 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
     setInfoMessage(null);
 
     try {
-      const email = data.identifier.trim();
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email,
-        password: data.password,
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          identifier: data.identifier.trim(),
+          password: data.password,
+        }),
       });
+      const result = (await response.json()) as {
+        destination?: string;
+        error?: string;
+      };
 
-      if (error) {
+      if (!response.ok) {
+        const message = result.error ?? "Login gagal.";
         if (
-          error.message.toLowerCase().includes("invalid login credentials") ||
-          error.message.toLowerCase().includes("invalid_credentials")
+          message.toLowerCase().includes("invalid login credentials") ||
+          message.toLowerCase().includes("invalid_credentials") ||
+          response.status === 401
         ) {
           setServerError(
             "Email atau kata sandi tidak cocok. Silakan coba lagi.",
           );
         } else if (
-          error.message.toLowerCase().includes("email not confirmed")
+          message.toLowerCase().includes("email not confirmed")
         ) {
           setServerError(
             "Email kamu belum dikonfirmasi. Silakan periksa inbox/spam email kamu.",
           );
         } else {
-          setServerError(error.message);
+          setServerError(message);
         }
         return;
       }
 
-      if (authData.user) {
-        const destination =
-          authData.user.user_metadata?.accountType === "umkm" ? "/umkm" : "/";
-        const metadata = authData.user.user_metadata || {};
-        const isUmkm =
-          metadata.accountType === "umkm" ||
-          metadata.role === "UMKM" ||
-          metadata.role?.toLowerCase() === "umkm" ||
-          metadata.account_type === "umkm";
-        const destination = isUmkm ? "/umkm" : "/";
-        router.push(destination);
-        router.refresh();
-      }
+      router.push(result.destination ?? "/");
+      router.refresh();
     } catch (err: unknown) {
       setServerError(
         err instanceof Error ? err.message : "Terjadi kesalahan saat masuk.",

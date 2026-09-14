@@ -39,11 +39,13 @@ function formatSeconds(totalSeconds: number): string {
 
 interface CountdownTimerProps {
   timeLeft: string;
+  deadlineAt?: string;
   expired?: boolean;
 }
 
 export default function CountdownTimer({
   timeLeft,
+  deadlineAt,
   expired = false,
 }: CountdownTimerProps) {
   const [secondsLeft, setSecondsLeft] = useState(() =>
@@ -53,10 +55,12 @@ export default function CountdownTimer({
   useEffect(() => {
     if (expired || secondsLeft <= 0) return;
     const interval = setInterval(() => {
-      setSecondsLeft((prev) => Math.max(0, prev - 1));
+      setSecondsLeft((prev) => deadlineAt
+        ? Math.max(0, Math.floor((new Date(deadlineAt).getTime() - Date.now()) / 1000))
+        : Math.max(0, prev - 1));
     }, 1000);
     return () => clearInterval(interval);
-  }, [expired, secondsLeft]);
+  }, [deadlineAt, expired, secondsLeft]);
 
   const isExpired = expired || secondsLeft <= 0;
 

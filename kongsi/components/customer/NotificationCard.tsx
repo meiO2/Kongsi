@@ -1,4 +1,4 @@
-import type { NotificationItem, NotificationType } from "@/lib/customerMockData";
+import type { NotificationItem, NotificationType } from "@/lib/customerData";
 import {
   BellIcon,
   CheckCircleFilledIcon,

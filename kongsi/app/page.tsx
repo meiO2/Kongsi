@@ -5,11 +5,10 @@ import Link from "next/link";
 import DealCard from "@/components/customer/DealCard";
 import CategoryCard from "@/components/customer/CategoryCard";
 import {
-  ChevronDownIcon,
   LocationIcon,
   SlidersIcon,
 } from "@/components/customer/icons";
-import { CATEGORIES, type GroupDeal } from "@/lib/customerMockData";
+import { CATEGORIES, type GroupDeal } from "@/lib/customerData";
 import CustomerNavbar from "@/components/customer/CustomerNavbar";
 
 const SORT_OPTIONS = [
@@ -30,6 +29,7 @@ interface CustomerDealResponse {
   current_participants: number;
   target_participants: number;
   deadline: string;
+  deadline_at: string;
   category: string;
   fulfillment: GroupDeal["fulfillment"];
   pickup_hours: string | null;
@@ -44,9 +44,21 @@ interface CustomerDealResponse {
 export default function CustomerHomePage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [sort, setSort] = useState<SortValue>("terdekat");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
   const [deals, setDeals] = useState<GroupDeal[]>([]);
   const [loadingDeals, setLoadingDeals] = useState(true);
   const [dealError, setDealError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSearchQuery(
+        new URLSearchParams(window.location.search).get("q")?.trim() ?? "",
+      );
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     async function loadDeals() {
@@ -73,6 +85,7 @@ export default function CustomerHomePage() {
             targetParticipants: deal.target_participants,
             remainingLabel: deal.remaining_label,
             timeLeft: deal.deadline,
+            deadlineAt: deal.deadline_at,
             imageEmoji: deal.image_emoji,
             imageUrl: deal.image_url ?? undefined,
             locationLabel: deal.pickup_location ?? undefined,
@@ -96,14 +109,22 @@ export default function CustomerHomePage() {
     loadDeals();
   }, []);
 
-  // Frontend-only sort over the mock recommended deals — no real
-  // backend/filtering logic, just enough to demonstrate the control.
   const sortedDeals = useMemo(() => {
-    const filtered = activeCategory
-      ? deals.filter((deal) =>
-          deal.category?.toLowerCase().includes(activeCategory),
-        )
-      : deals;
+    const normalizedSearch = searchQuery.toLocaleLowerCase("id-ID");
+    const normalizedLocation = locationQuery.toLocaleLowerCase("id-ID");
+    const filtered = deals.filter((deal) => {
+      const matchesCategory = !activeCategory ||
+        deal.category?.toLocaleLowerCase("id-ID").includes(activeCategory);
+      const searchable = [deal.name, deal.seller, deal.category, deal.description, deal.locationLabel]
+        .filter(Boolean)
+        .join(" ")
+        .toLocaleLowerCase("id-ID");
+      const matchesSearch = !normalizedSearch || searchable.includes(normalizedSearch);
+      const matchesPrice = !maxPrice || deal.kongsiPrice <= Number(maxPrice);
+      const matchesLocation = !normalizedLocation ||
+        deal.locationLabel?.toLocaleLowerCase("id-ID").includes(normalizedLocation);
+      return matchesCategory && matchesSearch && matchesPrice && matchesLocation;
+    });
     const sorted = [...filtered];
     if (sort === "harga") {
       return sorted.sort((a, b) => a.kongsiPrice - b.kongsiPrice);
@@ -116,7 +137,7 @@ export default function CustomerHomePage() {
       );
     }
     return sorted;
-  }, [activeCategory, deals, sort]);
+  }, [activeCategory, deals, locationQuery, maxPrice, searchQuery, sort]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -176,19 +197,38 @@ export default function CustomerHomePage() {
 
         {/* FILTER & SORT */}
         <section className="flex flex-col gap-3 rounded-2xl border border-[#E4E1DF] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-          <div className="flex flex-wrap items-center gap-2 text-sm">
+          <div className="flex flex-1 flex-wrap items-center gap-2 text-sm">
             <SlidersIcon className="h-4 w-4 text-[#7A7876]" />
             <span className="mr-1 font-medium text-[#292828]">Filter:</span>
-            {["Kategori", "Harga", "Lokasi"].map((filter) => (
-              <button
-                key={filter}
-                type="button"
-                className="flex items-center gap-1 rounded-full border border-[#E4E1DF] bg-white px-3 py-1.5 font-medium text-[#292828] transition-colors hover:border-[#3991FA]/40"
-              >
-                {filter}
-                <ChevronDownIcon className="h-3.5 w-3.5 text-[#7A7876]" />
-              </button>
-            ))}
+            <select
+              aria-label="Filter kategori"
+              value={activeCategory ?? ""}
+              onChange={(event) => setActiveCategory(event.target.value || null)}
+              className="rounded-full border border-[#E4E1DF] bg-white px-3 py-1.5 font-medium text-[#292828] outline-none focus:border-[#3991FA]"
+            >
+              <option value="">Semua kategori</option>
+              {CATEGORIES.map((category) => (
+                <option key={category.id} value={category.id}>{category.label}</option>
+              ))}
+            </select>
+            <select
+              aria-label="Filter harga"
+              value={maxPrice}
+              onChange={(event) => setMaxPrice(event.target.value)}
+              className="rounded-full border border-[#E4E1DF] bg-white px-3 py-1.5 font-medium text-[#292828] outline-none focus:border-[#3991FA]"
+            >
+              <option value="">Semua harga</option>
+              <option value="25000">Maks. Rp25.000</option>
+              <option value="50000">Maks. Rp50.000</option>
+              <option value="100000">Maks. Rp100.000</option>
+            </select>
+            <input
+              aria-label="Filter lokasi"
+              value={locationQuery}
+              onChange={(event) => setLocationQuery(event.target.value)}
+              placeholder="Lokasi"
+              className="min-w-0 rounded-full border border-[#E4E1DF] bg-white px-3 py-1.5 font-medium text-[#292828] outline-none placeholder:text-[#B3B0AE] focus:border-[#3991FA]"
+            />
           </div>
 
           <label className="flex items-center gap-2 text-sm">
@@ -217,7 +257,9 @@ export default function CustomerHomePage() {
               Rekomendasi untukmu
             </h2>
             <p className="text-sm text-[#7A7876]">
-              Group Deal yang mungkin cocok buat kamu.
+              {searchQuery
+                ? `Hasil pencarian untuk “${searchQuery}”.`
+                : "Group Deal yang mungkin cocok buat kamu."}
             </p>
           </div>
 

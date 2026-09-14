@@ -1,4 +1,4 @@
-import type { Seller } from "@/lib/customerMockData";
+import type { Seller } from "@/lib/customerData";
 import { StarIcon } from "./icons";
 
 interface SellerRatingProps {

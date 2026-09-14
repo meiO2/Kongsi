@@ -6,9 +6,11 @@ import SellerRating from "@/components/customer/SellerRating";
 import {
   formatRupiah,
   getDealStatus,
-  getSellerById,
-} from "@/lib/customerMockData";
-import { getCustomerGroupDealById } from "@/lib/customerGroupDeals";
+} from "@/lib/customerData";
+import {
+  getCustomerGroupDealById,
+  getCustomerSellerByOwner,
+} from "@/lib/customerGroupDeals";
 
 export default async function DealDetailPage({
   params,
@@ -22,7 +24,7 @@ export default async function DealDetailPage({
     notFound();
   }
 
-  const seller = getSellerById(deal.sellerId);
+  const seller = await getCustomerSellerByOwner(deal.sellerId);
   const status = getDealStatus(deal);
   const remaining = deal.targetParticipants - deal.currentParticipants;
   const isAlmostThere =
@@ -39,8 +41,11 @@ export default async function DealDetailPage({
 
       <div className="flex flex-col gap-6 rounded-2xl border border-[#E4E1DF] bg-white p-5 sm:p-8">
         {/* Product image */}
-        <div className="flex aspect-[16/9] w-full items-center justify-center rounded-2xl bg-[#F1EFEF] text-7xl sm:aspect-[21/9]">
-          <span aria-hidden>{deal.imageEmoji}</span>
+        <div
+          className="flex aspect-[16/9] w-full items-center justify-center rounded-2xl bg-cover bg-center bg-[#F1EFEF] text-7xl sm:aspect-[21/9]"
+          style={deal.imageUrl ? { backgroundImage: `url(${deal.imageUrl})` } : undefined}
+        >
+          {!deal.imageUrl && <span aria-hidden>{deal.imageEmoji}</span>}
         </div>
 
         {/* Header */}
@@ -53,7 +58,7 @@ export default async function DealDetailPage({
           </h1>
 
           <Link
-            href={`/umkm/${deal.sellerId}`}
+            href={`/seller/${deal.sellerId}`}
             className="mt-2 flex w-fit items-center gap-2 text-sm font-semibold text-[#292828] hover:underline"
           >
             {deal.seller}
@@ -107,7 +112,7 @@ export default async function DealDetailPage({
           )}
 
           {status === "berlangsung" && (
-            <CountdownTimer timeLeft={deal.timeLeft} />
+            <CountdownTimer timeLeft={deal.timeLeft} deadlineAt={deal.deadlineAt} />
           )}
           {status === "berakhir" && (
             <CountdownTimer timeLeft={deal.timeLeft} expired />

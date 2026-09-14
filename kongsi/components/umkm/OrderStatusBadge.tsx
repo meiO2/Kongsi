@@ -1,4 +1,4 @@
-    import { ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/orderMockData";
+    import { ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/orderData";
 
     const STATUS_STYLES: Record<OrderStatus, string> = {
     menunggu: "bg-[#7A7876]/10 text-[#7A7876]",

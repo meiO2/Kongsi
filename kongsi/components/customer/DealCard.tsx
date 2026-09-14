@@ -1,8 +1,9 @@
 import Link from "next/link";
-import type { GroupDeal } from "@/lib/customerMockData";
-import { formatRupiah } from "@/lib/customerMockData";
+import type { GroupDeal } from "@/lib/customerData";
+import { formatRupiah } from "@/lib/customerData";
 import ProgressBar from "./ProgressBar";
 import { ClockIcon, LocationIcon } from "./icons";
+import LiveCountdown from "@/components/shared/LiveCountdown";
 
 interface DealCardProps {
   deal: GroupDeal;
@@ -80,7 +81,10 @@ export default function DealCard({
             {variant !== "nearby" && (
               <span className="flex items-center gap-1">
                 <ClockIcon className="h-3.5 w-3.5" />
-                {deal.timeLeft}
+                <LiveCountdown
+                  deadlineAt={deal.deadlineAt}
+                  initialLabel={deal.timeLeft}
+                />
               </span>
             )}
           </div>

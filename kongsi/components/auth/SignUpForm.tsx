@@ -21,6 +21,7 @@ const INITIAL_DATA: SignUpFormData = {
   businessName: "",
   businessCategory: "",
   businessAddress: "",
+  verificationDocumentUrl: "",
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -61,6 +62,16 @@ function validate(data: SignUpFormData): SignUpFormErrors {
     if (!data.businessAddress.trim()) {
       errors.businessAddress = "Masukkan alamat usaha kamu";
     }
+    if (!data.verificationDocumentUrl.trim()) {
+      errors.verificationDocumentUrl = "Masukkan tautan dokumen pendukung usaha";
+    } else {
+      try {
+        const documentUrl = new URL(data.verificationDocumentUrl);
+        if (!["http:", "https:"].includes(documentUrl.protocol)) throw new Error();
+      } catch {
+        errors.verificationDocumentUrl = "Gunakan tautan dokumen http atau https yang valid";
+      }
+    }
   }
 
   return errors;
@@ -95,6 +106,7 @@ export default function SignUpForm() {
         businessName: undefined,
         businessCategory: undefined,
         businessAddress: undefined,
+        verificationDocumentUrl: undefined,
       }));
     }
   }
@@ -119,7 +131,7 @@ export default function SignUpForm() {
         options: {
           data: {
             name: data.name.trim(),
-            phone: data.phone.trim(),
+            phone: normalizePhone(data.phone),
             accountType: data.accountType,
             account_type: data.accountType,
             role: data.accountType === "umkm" ? "UMKM" : "CUSTOMER",
@@ -135,6 +147,14 @@ export default function SignUpForm() {
               data.accountType === "umkm" ? data.businessAddress.trim() : null,
             business_address:
               data.accountType === "umkm" ? data.businessAddress.trim() : null,
+            verificationDocumentUrl:
+              data.accountType === "umkm"
+                ? data.verificationDocumentUrl.trim()
+                : null,
+            verification_document_url:
+              data.accountType === "umkm"
+                ? data.verificationDocumentUrl.trim()
+                : null,
           },
           emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
         },
@@ -153,8 +173,6 @@ export default function SignUpForm() {
 
       // If Supabase has confirm email disabled, user has session immediately
       if (authData.session) {
-        const destination =
-          authData.user?.user_metadata?.accountType === "umkm" ? "/umkm" : "/";
         const metadata = authData.user?.user_metadata || {};
         const isUmkm =
           metadata.accountType === "umkm" ||
@@ -353,6 +371,18 @@ export default function SignUpForm() {
                 </p>
               )}
             </div>
+
+            <FormField
+              label="Dokumen Pendukung UMKM"
+              name="verificationDocumentUrl"
+              type="url"
+              placeholder="Tautan NIB, izin usaha, atau dokumen pendukung"
+              value={data.verificationDocumentUrl}
+              error={errors.verificationDocumentUrl}
+              onChange={(e) =>
+                updateField("verificationDocumentUrl", e.target.value)
+              }
+            />
           </div>
         </div>
       </div>
@@ -367,4 +397,9 @@ export default function SignUpForm() {
       </button>
     </form>
   );
+}
+
+function normalizePhone(value: string) {
+  const digits = value.replace(/\D/g, "");
+  return digits.startsWith("62") ? `0${digits.slice(2)}` : digits;
 }

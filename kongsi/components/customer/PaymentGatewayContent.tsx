@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Script from "next/script";
-import { formatRupiah } from "@/lib/customerMockData";
+import { formatRupiah } from "@/lib/customerData";
 import { CheckCircleIcon, ClockIcon } from "@/components/customer/icons";
 
 type SnapCallbacks = {

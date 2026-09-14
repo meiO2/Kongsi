@@ -62,18 +62,17 @@ export default function ProfilePage() {
     let isMounted = true;
 
     async function loadProfile() {
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
-      if (!user || !isMounted) return;
-
-      const name = user.user_metadata?.name || user.email || EMPTY_PROFILE.name;
+      const response = await fetch("/api/profile");
+      const data = await response.json();
+      if (!response.ok || !isMounted) return;
+      const name = data.name || EMPTY_PROFILE.name;
       setProfile({
         name,
-        phone: user.user_metadata?.phone || "-",
-        email: user.email || "-",
+        phone: data.phone || "-",
+        email: data.email || "-",
         avatarInitial: name.charAt(0).toUpperCase(),
-        addresses: Array.isArray(user.user_metadata?.addresses)
-          ? user.user_metadata.addresses
+        addresses: Array.isArray(data.addresses)
+          ? data.addresses.map((address: { id: string; label: string; detail: string; maps_url?: string; is_primary?: boolean }) => ({ id: address.id, label: address.label, detail: address.detail, mapsUrl: address.maps_url, isPrimary: address.is_primary }))
           : [],
       });
     }
@@ -103,25 +102,25 @@ export default function ProfilePage() {
 
     setIsSavingAddress(true);
     setAddressError(null);
-    const address: Address = {
-      id: crypto.randomUUID(),
-      label,
-      detail,
-      mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(detail)}`,
-      isPrimary: profile.addresses.length === 0,
-    };
-    const addresses = [...profile.addresses, address];
-    const { error } = await supabase.auth.updateUser({ data: { addresses } });
-
-    if (error) {
-      setAddressError(error.message);
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(detail)}`;
+    const response = await fetch("/api/profile", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label, detail, mapsUrl }) });
+    const result = await response.json();
+    if (!response.ok) {
+      setAddressError(result.error ?? "Alamat gagal disimpan.");
     } else {
-      setProfile((current) => ({ ...current, addresses }));
+      const address: Address = { id: result.id, label: result.label, detail: result.detail, mapsUrl: result.maps_url, isPrimary: result.is_primary };
+      setProfile((current) => ({ ...current, addresses: [...current.addresses, address] }));
       setAddressLabel("");
       setAddressDetail("");
       setIsAddingAddress(false);
     }
     setIsSavingAddress(false);
+  }
+
+  async function setPrimaryAddress(addressId: string) {
+    const response = await fetch("/api/profile", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ addressId }) });
+    if (!response.ok) return;
+    setProfile((current) => ({ ...current, addresses: current.addresses.map((address) => ({ ...address, isPrimary: address.id === addressId })) }));
   }
 
   async function handleUseCurrentLocation() {
@@ -277,6 +276,11 @@ export default function ProfilePage() {
                 >
                   Buka di Google Maps
                 </a>
+                {!address.isPrimary && (
+                  <button type="button" onClick={() => setPrimaryAddress(address.id)} className="ml-3 text-sm font-semibold text-[#3991FA] hover:underline">
+                    Jadikan alamat utama
+                  </button>
+                )}
               </div>
               <ChevronRightIcon className="h-4 w-4 shrink-0 text-[#B3B0AE]" />
             </div>

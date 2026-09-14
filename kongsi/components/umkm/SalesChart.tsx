@@ -1,4 +1,4 @@
-import type { SalesDataPoint } from "@/lib/umkmMockData";
+import type { SalesDataPoint } from "@/lib/umkmData";
 
 interface SalesChartProps {
   data: SalesDataPoint[];

@@ -1,7 +1,8 @@
-import type { ActiveKongsi } from "@/lib/umkmMockData";
-import { formatRupiah } from "@/lib/umkmMockData";
+import type { ActiveKongsi } from "@/lib/umkmData";
+import { formatRupiah } from "@/lib/umkmData";
 import Link from "next/link";
 import { ClockIcon } from "./icons";
+import LiveCountdown from "@/components/shared/LiveCountdown";
 
 export default function ActiveKongsiCard({ kongsi }: { kongsi: ActiveKongsi }) {
   const percent = Math.min(
@@ -56,7 +57,11 @@ export default function ActiveKongsiCard({ kongsi }: { kongsi: ActiveKongsi }) {
           </span>
           <span className="flex items-center gap-1">
             <ClockIcon className="h-3.5 w-3.5" />
-            Berakhir dalam {kongsi.timeLeft}
+            Berakhir dalam{" "}
+            <LiveCountdown
+              deadlineAt={kongsi.deadlineAt}
+              initialLabel={kongsi.timeLeft}
+            />
           </span>
         </div>
       </div>

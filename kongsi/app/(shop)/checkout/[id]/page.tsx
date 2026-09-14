@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import CheckoutView from "@/components/customer/CheckoutView";
-import { getDealStatus, getSellerById } from "@/lib/customerMockData";
-import { getCustomerGroupDealById } from "@/lib/customerGroupDeals";
+import { getDealStatus } from "@/lib/customerData";
+import {
+  getCustomerGroupDealById,
+  getCustomerSellerByOwner,
+} from "@/lib/customerGroupDeals";
 
 export default async function CheckoutPage({
   params,
@@ -15,7 +18,7 @@ export default async function CheckoutPage({
     notFound();
   }
 
-  const seller = getSellerById(deal.sellerId);
+  const seller = await getCustomerSellerByOwner(deal.sellerId);
 
   return <CheckoutView deal={deal} seller={seller} />;
 }

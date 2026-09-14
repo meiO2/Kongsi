@@ -10,7 +10,7 @@ import {
   KONGSI_CATEGORIES,
   type FulfillmentMethod,
   type KongsiCategory,
-} from "@/lib/kongsiMockData";
+} from "@/lib/kongsiData";
 
 interface FormState {
   productName: string;

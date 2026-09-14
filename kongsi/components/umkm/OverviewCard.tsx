@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { OverviewMetric } from "@/lib/umkmMockData";
+import type { OverviewMetric } from "@/lib/umkmData";
 import { ArrowDownRightIcon, ArrowUpRightIcon, ShoppingBagIcon, UsersIcon, WalletIcon } from "./icons";
 
 const ICONS: Record<OverviewMetric["icon"], ComponentType<{ className?: string }>> = {

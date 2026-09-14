@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { formatRemainingTime } from "@/lib/deadline";
 
 const ALLOWED_CATEGORIES = [
   "Kuliner",
-  "Kerajinan",
   "Fashion",
-  "Lainnya",
+  "Kerajinan",
+  "Kebutuhan Rumah",
+  "Produk Lokal",
 ] as const;
 const ALLOWED_FULFILLMENT = ["pickup", "delivery", "pickup-delivery"] as const;
 
@@ -25,7 +27,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from("group_deals")
     .select(
-      "id, product_name, description, image_url, normal_price, kongsi_price, current_participants, target_participants, deadline, category, fulfillment, pickup_location, pickup_hours, delivery_fee, status",
+      "id, product_name, description, image_url, normal_price, kongsi_price, current_participants, target_participants, deadline, deadline_at, category, fulfillment, pickup_location, pickup_hours, delivery_fee, status",
     )
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
@@ -34,7 +36,7 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json(data.map((deal) => ({ ...deal, deadline: formatRemainingTime(deal.deadline_at) })));
 }
 
 export async function POST(request: Request) {
@@ -54,6 +56,7 @@ export async function POST(request: Request) {
     .from("umkm")
     .select("umkm_id")
     .eq("owner_id", user.id)
+    .limit(1)
     .maybeSingle();
 
   if (umkmError) {
@@ -103,6 +106,10 @@ export async function POST(request: Request) {
   const kongsiPrice = Number(body.kongsiPrice);
   const targetParticipants = Number(body.targetParticipants);
   const deliveryFee = body.deliveryFee ? Number(body.deliveryFee) : 0;
+  const deadlineAmount = Number(body.deadlineAmount);
+  const deadlineMs = body.deadlineUnit === "hari"
+    ? deadlineAmount * 24 * 60 * 60 * 1000
+    : deadlineAmount * 60 * 60 * 1000;
 
   if (
     !Number.isFinite(normalPrice) ||
@@ -111,6 +118,8 @@ export async function POST(request: Request) {
     targetParticipants < 1 ||
     kongsiPrice >= normalPrice ||
     (body.deliveryFee && !Number.isFinite(deliveryFee))
+    || !Number.isFinite(deadlineAmount)
+    || deadlineAmount < 1
   ) {
     return NextResponse.json(
       { error: "Nilai harga atau target tidak valid." },
@@ -130,6 +139,7 @@ export async function POST(request: Request) {
       kongsi_price: kongsiPrice,
       target_participants: targetParticipants,
       deadline: body.deadline.trim(),
+      deadline_at: new Date(Date.now() + deadlineMs).toISOString(),
       category: body.category,
       fulfillment: body.fulfillment,
       pickup_location: body.pickupLocation?.trim() || null,

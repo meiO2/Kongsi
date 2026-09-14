@@ -10,7 +10,7 @@ import {
   type KongsiCategory,
   type KongsiDeal,
   type KongsiStatus,
-} from "@/lib/kongsiMockData";
+} from "@/lib/kongsiData";
 
 interface GroupDealResponse {
   id: string;
@@ -22,6 +22,7 @@ interface GroupDealResponse {
   current_participants: number;
   target_participants: number;
   deadline: string;
+  deadline_at: string;
   category: KongsiCategory;
   fulfillment: FulfillmentMethod;
   pickup_location: string | null;
@@ -43,6 +44,7 @@ function mapDeal(deal: GroupDealResponse): KongsiDeal {
     currentParticipants: deal.current_participants,
     targetParticipants: deal.target_participants,
     timeLeft: deal.deadline,
+    deadlineAt: deal.deadline_at,
     status: deal.status,
     fulfillment: deal.fulfillment,
     pickupLocation: deal.pickup_location ?? undefined,

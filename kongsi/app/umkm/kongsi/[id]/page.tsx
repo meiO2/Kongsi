@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import KongsiDetailView from "@/components/umkm/KongsiDetailView";
 import { createClient } from "@/utils/supabase/server";
-import type { KongsiDeal } from "@/lib/kongsiMockData";
+import { formatRemainingTime } from "@/lib/deadline";
+import type { KongsiDeal } from "@/lib/kongsiData";
 
 export default async function KongsiDetailPage({
   params,
@@ -19,7 +20,7 @@ export default async function KongsiDetailPage({
   const { data, error } = await supabase
     .from("group_deals")
     .select(
-      "id, product_name, description, image_url, normal_price, kongsi_price, current_participants, target_participants, deadline, category, fulfillment, pickup_location, pickup_hours, delivery_fee, status",
+      "id, product_name, description, image_url, normal_price, kongsi_price, current_participants, target_participants, deadline, deadline_at, category, fulfillment, pickup_location, pickup_maps_url, pickup_hours, delivery_fee, status",
     )
     .eq("id", id)
     .eq("owner_id", user.id)
@@ -38,10 +39,12 @@ export default async function KongsiDetailPage({
     kongsiPrice: data.kongsi_price,
     currentParticipants: data.current_participants,
     targetParticipants: data.target_participants,
-    timeLeft: data.deadline,
+    timeLeft: formatRemainingTime(data.deadline_at),
+    deadlineAt: data.deadline_at,
     status: data.status,
     fulfillment: data.fulfillment,
     pickupLocation: data.pickup_location ?? undefined,
+    pickupMapsUrl: data.pickup_maps_url ?? undefined,
     pickupHours: data.pickup_hours ?? undefined,
     deliveryFee: data.delivery_fee ?? undefined,
   };

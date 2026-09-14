@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { StarRatingDisplay, StarRatingInput } from "./StarRating";
-import { RATING_LABELS, type Order, type Review } from "@/lib/customerMockData";
+import { RATING_LABELS, type Order, type Review } from "@/lib/customerData";
 
 interface RatingViewProps {
   order: Order;
@@ -16,9 +16,24 @@ export default function RatingView({ order, existingReview }: RatingViewProps) {
   const [rating, setRating] = useState(existingReview?.rating ?? 0);
   const [comment, setComment] = useState(existingReview?.comment ?? "");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (rating === 0) return;
+    setSubmitting(true);
+    setError(null);
+    const response = await fetch(`/api/reviews/${order.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rating, comment }),
+    });
+    const result = (await response.json()) as { error?: string };
+    if (!response.ok) {
+      setError(result.error ?? "Ulasan gagal disimpan.");
+      setSubmitting(false);
+      return;
+    }
     setReview({
       id: existingReview?.id ?? `review-${order.id}`,
       sellerId: order.sellerId,
@@ -29,6 +44,7 @@ export default function RatingView({ order, existingReview }: RatingViewProps) {
     });
     setSubmitted(true);
     setEditing(false);
+    setSubmitting(false);
   };
 
   // Thank-you state right after submitting
@@ -156,11 +172,12 @@ export default function RatingView({ order, existingReview }: RatingViewProps) {
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={rating === 0}
+        disabled={rating === 0 || submitting}
         className="flex w-full items-center justify-center rounded-2xl bg-[#3991FA] py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#2B7FE0] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        Kirim Ulasan
+        {submitting ? "Menyimpan..." : "Kirim Ulasan"}
       </button>
+      {error && <p className="text-sm text-[#E14B4B]">{error}</p>}
     </main>
   );
 }

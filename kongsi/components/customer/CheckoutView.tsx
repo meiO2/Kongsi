@@ -7,7 +7,7 @@ import {
   formatRupiah,
   type GroupDeal,
   type Seller,
-} from "@/lib/customerMockData";
+} from "@/lib/customerData";
 import FulfillmentPicker, { type FulfillmentChoice } from "./FulfillmentPicker";
 import PaymentMethodSelector, {
   type PaymentMethod,
@@ -54,6 +54,25 @@ export default function CheckoutView({
     setError(null);
 
     try {
+      let deliveryAddress: string | null = null;
+      if (fulfillment === "delivery") {
+        const profileResponse = await fetch("/api/profile");
+        const profile = (await profileResponse.json()) as {
+          addresses?: Array<{ detail?: string; is_primary?: boolean }>;
+          error?: string;
+        };
+        if (!profileResponse.ok) throw new Error(profile.error ?? "Profil gagal dimuat.");
+        const addresses = profile.addresses ?? [];
+        const selectedAddress =
+          addresses.find((address) => address.is_primary) ?? addresses[0];
+        deliveryAddress = selectedAddress?.detail?.trim() || null;
+        if (!deliveryAddress) {
+          throw new Error(
+            "Tambahkan alamat utama di profil sebelum memilih delivery.",
+          );
+        }
+      }
+
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -61,6 +80,7 @@ export default function CheckoutView({
           groupDealId: deal.id,
           quantity,
           fulfillment,
+          deliveryAddress,
         }),
       });
       const result = (await response.json()) as {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import midtransClient from "midtrans-client";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -162,18 +162,7 @@ export async function GET(request: Request) {
     paymentMethod &&
     (transactionStatus === "settlement" || transactionStatus === "capture")
   ) {
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceRoleKey) {
-      return NextResponse.json(
-        { error: "SUPABASE_SERVICE_ROLE_KEY belum dikonfigurasi." },
-        { status: 500 },
-      );
-    }
-    const admin = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceRoleKey,
-      { auth: { autoRefreshToken: false, persistSession: false } },
-    );
+    const admin = createAdminClient();
     let settled;
     try {
       settled = await admin.rpc("settle_group_deal_order", {

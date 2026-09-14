@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ComponentType } from "react";
-import type { ActionItem } from "@/lib/umkmMockData";
+import type { ActionItem } from "@/lib/umkmData";
 import { AlarmClockIcon, PackageCheckIcon, ShoppingBagIcon } from "./icons";
 
 const ICON_BY_TYPE: Record<ActionItem["type"], ComponentType<{ className?: string }>> = {

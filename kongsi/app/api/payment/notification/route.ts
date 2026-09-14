@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import midtransClient from "midtrans-client";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 function getPaymentMethod(
   paymentType?: string,
@@ -45,24 +45,18 @@ export async function POST(request: Request) {
       (transactionStatus === "settlement" || transactionStatus === "capture") &&
       transaction.fraud_status !== "deny";
     const isFailed = ["deny", "cancel", "expire"].includes(transactionStatus);
+    const isRefunded = ["refund", "partial_refund"].includes(transactionStatus);
     const paymentStatus = isPaid ? "paid" : isFailed ? "failed" : "pending";
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!serviceRoleKey) {
-      return NextResponse.json(
-        { error: "SUPABASE_SERVICE_ROLE_KEY belum dikonfigurasi." },
-        { status: 500 },
-      );
-    }
-
-    const supabase = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceRoleKey,
-      { auth: { autoRefreshToken: false, persistSession: false } },
-    );
+    const supabase = createAdminClient();
     const paymentMethod = getPaymentMethod(transaction.payment_type);
     let error: { message: string } | null = null;
-    if (paymentStatus === "paid" && paymentMethod) {
+    if (isRefunded) {
+      const result = await supabase.rpc("complete_group_deal_refund", {
+        p_order_number: transaction.order_id,
+      });
+      error = (result as unknown as { error: { message: string } | null })
+        .error;
+    } else if (paymentStatus === "paid" && paymentMethod) {
       const result = await supabase.rpc("settle_group_deal_order", {
         p_order_number: transaction.order_id,
         p_payment_method: paymentMethod,

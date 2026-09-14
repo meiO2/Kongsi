@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import OrderCard from "@/components/customer/OrderCard";
-import { type Order, type OrderStatus } from "@/lib/customerMockData";
+import { type Order, type OrderStatus } from "@/lib/customerData";
 
 const TABS: { value: OrderStatus; label: string }[] = [
   { value: "berlangsung", label: "Sedang Berlangsung" },
@@ -32,29 +32,46 @@ export default function OrdersPage() {
           result.map((order) => {
             const currentParticipants = Number(order.participants_after ?? 0);
             const targetParticipants = Number(order.target_participants ?? 1);
+            const fulfillmentStatus = String(order.status);
+            const paymentStatus = String(order.payment_status);
             const status =
-              currentParticipants >= targetParticipants
-                ? "sukses"
-                : "berlangsung";
+              ["failed", "refund-pending", "refunded"].includes(paymentStatus) || fulfillmentStatus === "dibatalkan"
+                ? "gagal"
+                : fulfillmentStatus === "selesai"
+                  ? "selesai"
+                  : currentParticipants >= targetParticipants ||
+                      !["menunggu", "null", "undefined"].includes(fulfillmentStatus)
+                    ? "sukses"
+                    : "berlangsung";
             return {
               id: String(order.id),
               orderNumber: String(order.order_number),
               dealId: String(order.group_deal_id),
               sellerId: String(order.owner_id),
               dealName: String(order.product_name),
-              seller: "UMKM lokal",
+              seller: String(order.seller_name ?? "UMKM lokal"),
               currentParticipants,
               targetParticipants,
               status,
               statusLabel:
-                status === "sukses"
-                  ? "Kongsi Berhasil"
-                  : "Menunggu Kongsi Berhasil",
+                status === "selesai"
+                  ? "Selesai"
+                  : status === "gagal"
+                    ? "Pembayaran dikembalikan"
+                    : status === "sukses"
+                      ? "Pesanan sedang diproses"
+                      : "Menunggu Kongsi Berhasil",
               helperLabel:
-                status === "sukses"
-                  ? "Pesanan sedang diproses UMKM."
-                  : `Tinggal ${Math.max(0, targetParticipants - currentParticipants)} orang lagi!`,
+                status === "selesai"
+                  ? "Pesanan sudah diterima"
+                  : status === "gagal"
+                    ? "Target tidak tercapai"
+                    : status === "sukses"
+                      ? "Target tercapai 🎉"
+                      : `Tinggal ${Math.max(0, targetParticipants - currentParticipants)} orang lagi!`,
               imageEmoji: "🛍️",
+              imageUrl: order.image_url ? String(order.image_url) : undefined,
+              hasReview: Boolean(order.has_review),
               quantity: Number(order.quantity),
               unitPrice: Number(order.unit_price),
               fulfillment: order.fulfillment as "pickup" | "delivery",

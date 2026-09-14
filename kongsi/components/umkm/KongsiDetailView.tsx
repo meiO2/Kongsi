@@ -1,40 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import KongsiProgress from "./KongsiProgress";
 import KongsiStatusBadge from "./KongsiStatusBadge";
 import ActionButton from "./ActionButton";
 import ExtendTimeModal from "./ExtendTimeModal";
-import { formatRupiah, type KongsiDeal } from "@/lib/kongsiMockData";
-
-function parseHours(timeLeft: string): number {
-  const durationMatch = timeLeft.match(/(\d+(?:\.\d+)?)\s*(jam|hari)/i);
-  if (durationMatch) {
-    const duration = Number(durationMatch[1]);
-    return durationMatch[2].toLowerCase() === "hari" ? duration * 24 : duration;
-  }
-
-  const [hours = "0", minutes = "0"] = timeLeft.split(":");
-  const parsedHours = Number(hours);
-  const parsedMinutes = Number(minutes);
-  return Number.isFinite(parsedHours) && Number.isFinite(parsedMinutes)
-    ? parsedHours + parsedMinutes / 60
-    : 0;
-}
-
-function formatHours(totalHours: number): string {
-  const hours = Math.floor(totalHours);
-  const minutes = Math.round((totalHours - hours) * 60);
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`;
-}
+import { formatRupiah, type KongsiDeal } from "@/lib/kongsiData";
+import LiveCountdown from "@/components/shared/LiveCountdown";
 
 export default function KongsiDetailView({ deal }: { deal: KongsiDeal }) {
   const [currentParticipants] = useState(deal.currentParticipants);
-  const [hoursLeft, setHoursLeft] = useState(() => parseHours(deal.timeLeft));
+  const [deadlineAt, setDeadlineAt] = useState(deal.deadlineAt);
   const [modalOpen, setModalOpen] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const timeLeft = useMemo(() => formatHours(hoursLeft), [hoursLeft]);
   const remaining = deal.targetParticipants - currentParticipants;
   const isAlmostThere =
     deal.status === "berlangsung" && remaining <= 2 && remaining > 0;
@@ -54,6 +35,15 @@ export default function KongsiDetailView({ deal }: { deal: KongsiDeal }) {
       >
         ← Kembali ke Kongsi
       </Link>
+
+      {deal.status === "berlangsung" && (
+        <Link
+          href={`/umkm/kongsi/${deal.id}/edit`}
+          className="self-end rounded-xl border border-[#3991FA] px-4 py-2 text-sm font-semibold text-[#3991FA] transition-colors hover:bg-[#3991FA]/[0.06]"
+        >
+          Edit Detail Kongsi
+        </Link>
+      )}
 
       <div className="flex flex-col gap-6 rounded-2xl border border-[#E4E1DF] bg-white p-5 sm:p-8">
         {/* Header */}
@@ -154,7 +144,8 @@ export default function KongsiDetailView({ deal }: { deal: KongsiDeal }) {
             <KongsiProgress
               current={currentParticipants}
               target={deal.targetParticipants}
-              timeLeft={timeLeft}
+              timeLeft={deal.timeLeft}
+              deadlineAt={deadlineAt}
               size="lg"
             />
 
@@ -162,6 +153,10 @@ export default function KongsiDetailView({ deal }: { deal: KongsiDeal }) {
               <span className="inline-flex w-fit items-center gap-1 rounded-full bg-[#FFCF00]/20 px-3 py-1.5 text-sm font-semibold text-[#7A6300]">
                 🔥 Tinggal {remaining} pembeli lagi!
               </span>
+            )}
+
+            {actionError && (
+              <p className="text-sm text-[#E14B4B]">{actionError}</p>
             )}
 
             {isAlmostThere && (
@@ -190,7 +185,7 @@ export default function KongsiDetailView({ deal }: { deal: KongsiDeal }) {
             label="Batas Waktu"
             value={
               deal.status === "berlangsung"
-                ? `${timeLeft} lagi`
+                ? <><LiveCountdown deadlineAt={deadlineAt} initialLabel={deal.timeLeft} /> lagi</>
                 : "Sudah berakhir"
             }
           />
@@ -219,8 +214,23 @@ export default function KongsiDetailView({ deal }: { deal: KongsiDeal }) {
       {modalOpen && (
         <ExtendTimeModal
           onClose={() => setModalOpen(false)}
-          onExtend={(hours) => {
-            setHoursLeft((prev) => prev + hours);
+          onExtend={async (hours) => {
+            setActionError(null);
+            const response = await fetch(`/api/group-deals/${deal.id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ extendHours: hours }),
+            });
+            const result = (await response.json()) as {
+              totalHours?: number;
+              deadlineAt?: string;
+              error?: string;
+            };
+            if (!response.ok || !result.deadlineAt) {
+              setActionError(result.error ?? "Waktu gagal ditambahkan.");
+              return;
+            }
+            setDeadlineAt(result.deadlineAt);
             setModalOpen(false);
           }}
         />
@@ -229,7 +239,7 @@ export default function KongsiDetailView({ deal }: { deal: KongsiDeal }) {
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div>
       <p className="text-xs font-medium text-[#7A7876]">{label}</p>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { calculateOrderTotal, formatRupiah, type Order } from "@/lib/orderMockData";
+import { calculateOrderTotal, formatRupiah, type Order } from "@/lib/orderData";
 import OrderStatusBadge from "./OrderStatusBadge";
 
 const FULFILLMENT_LABEL: Record<Order["fulfillment"], string> = {

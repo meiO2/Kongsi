@@ -1,36 +1,33 @@
-import type { ButtonHTMLAttributes } from "react";
-
-type Variant = "primary" | "outline" | "ghost" | "danger";
-
-interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  fullWidth?: boolean;
-}
-
-const VARIANT_STYLES: Record<Variant, string> = {
-  primary: "bg-[#3991FA] text-white hover:bg-[#2B7FE0]",
-  outline: "border border-[#E4E1DF] bg-white text-[#292828] hover:border-[#3991FA]/40",
-  ghost: "bg-transparent text-[#3991FA] hover:bg-[#3991FA]/[0.06]",
-  danger: "border border-[#E14B4B]/30 bg-white text-[#E14B4B] hover:bg-[#E14B4B]/[0.06]",
+type ActionButtonProps = {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  disabled?: boolean;
+  type?: "button" | "submit" | "reset";
+  variant?: "primary" | "outline";
 };
 
 export default function ActionButton({
-  variant = "primary",
-  fullWidth = false,
-  className,
   children,
-  ...props
+  onClick,
+  className = "",
+  disabled = false,
+  type = "button",
+  variant = "primary",
 }: ActionButtonProps) {
   return (
     <button
-      type="button"
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
       className={[
-        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-        VARIANT_STYLES[variant],
-        fullWidth ? "w-full" : "",
-        className ?? "",
+        "rounded-xl border px-4 py-3 text-sm font-semibold transition-colors",
+        variant === "outline"
+          ? "border-[#3991FA]/30 bg-white text-[#3991FA] hover:bg-[#3991FA]/[0.06]"
+          : "border-[#3991FA] bg-[#3991FA] text-white hover:bg-[#2B7FE0]",
+        "disabled:cursor-not-allowed disabled:opacity-60",
+        className,
       ].join(" ")}
-      {...props}
     >
       {children}
     </button>

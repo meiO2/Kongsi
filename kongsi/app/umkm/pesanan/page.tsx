@@ -7,7 +7,7 @@ import {
   ORDER_FILTERS,
   type Order,
   type OrderStatus,
-} from "@/lib/orderMockData";
+} from "@/lib/orderData";
 
 export default function PesananPage() {
   const [filter, setFilter] = useState<OrderStatus | "semua">("semua");

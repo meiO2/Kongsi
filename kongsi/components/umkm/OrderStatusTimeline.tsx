@@ -1,4 +1,4 @@
-import { ORDER_STATUS_LABEL, type Order, type OrderStatus } from "@/lib/orderMockData";
+import { ORDER_STATUS_LABEL, type Order, type OrderStatus } from "@/lib/orderData";
 
 function getSteps(fulfillment: Order["fulfillment"]): OrderStatus[] {
   const readyStatus: OrderStatus = fulfillment === "pickup" ? "siap-diambil" : "sedang-dikirim";

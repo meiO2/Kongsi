@@ -35,7 +35,7 @@ export default function CustomerNavbar() {
     );
 
     return () => authListener.subscription.unsubscribe();
-  }, [supabase]);
+  }, []);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -60,7 +60,7 @@ export default function CustomerNavbar() {
         </Link>
 
         {/* Search — desktop/tablet */}
-        <div className="hidden flex-1 sm:block sm:max-w-md md:max-w-lg">
+        <form action="/" method="get" className="hidden flex-1 sm:block sm:max-w-md md:max-w-lg">
           <label className="relative block w-full">
             <span className="sr-only">Cari produk atau Kongsi</span>
 
@@ -68,11 +68,12 @@ export default function CustomerNavbar() {
 
             <input
               type="search"
+              name="q"
               placeholder="Cari produk atau Kongsi..."
               className="w-full rounded-full border border-transparent bg-white py-2.5 pl-10 pr-4 font-[family-name:var(--font-body)] text-sm text-[#292828] placeholder:text-[#B3B0AE] outline-none transition-shadow focus:ring-4 focus:ring-white/40"
             />
           </label>
-        </div>
+        </form>
 
         {/* Right side — desktop nav */}
         <nav className="ml-auto hidden items-center gap-6 sm:flex">
@@ -143,7 +144,7 @@ export default function CustomerNavbar() {
       </div>
 
       {/* Search — mobile row */}
-      <div className="px-4 pb-3 sm:hidden">
+      <form action="/" method="get" className="px-4 pb-3 sm:hidden">
         <label className="relative block w-full">
           <span className="sr-only">Cari produk atau Kongsi</span>
 
@@ -151,11 +152,12 @@ export default function CustomerNavbar() {
 
           <input
             type="search"
+            name="q"
             placeholder="Cari produk atau Kongsi..."
             className="w-full rounded-full border border-transparent bg-white py-2.5 pl-10 pr-4 font-[family-name:var(--font-body)] text-sm text-[#292828] placeholder:text-[#B3B0AE] outline-none transition-shadow focus:ring-4 focus:ring-white/40"
           />
         </label>
-      </div>
+      </form>
 
       {/* Mobile dropdown menu */}
       {mobileOpen && (

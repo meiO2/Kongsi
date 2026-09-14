@@ -1,4 +1,4 @@
-import type { Category } from "@/lib/customerMockData";
+import type { Category } from "@/lib/customerData";
 
 interface CategoryCardProps {
   category: Category;

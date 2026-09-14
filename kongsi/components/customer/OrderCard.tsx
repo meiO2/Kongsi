@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getReviewForOrder, type Order } from "@/lib/customerMockData";
+import type { Order } from "@/lib/customerData";
 import ProgressBar from "./ProgressBar";
 
 const STATUS_STYLES: Record<Order["status"], string> = {
@@ -12,8 +12,11 @@ const STATUS_STYLES: Record<Order["status"], string> = {
 export default function OrderCard({ order }: { order: Order }) {
   return (
     <div className="flex gap-4 rounded-2xl border border-[#E4E1DF] bg-white p-4">
-      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#F1EFEF] text-3xl">
-        <span aria-hidden>{order.imageEmoji}</span>
+      <div
+        className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-cover bg-center bg-[#F1EFEF] text-3xl"
+        style={order.imageUrl ? { backgroundImage: `url(${order.imageUrl})` } : undefined}
+      >
+        {!order.imageUrl && <span aria-hidden>{order.imageEmoji}</span>}
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -65,7 +68,7 @@ export default function OrderCard({ order }: { order: Order }) {
             href={`/rating/${order.id}`}
             className="mt-1 flex w-fit items-center justify-center rounded-xl border border-[#3991FA]/30 px-4 py-2 text-sm font-semibold text-[#3991FA] transition-colors hover:bg-[#3991FA]/[0.06]"
           >
-            {getReviewForOrder(order.id) ? "Lihat Ulasan" : "Beri Rating"}
+            {order.hasReview ? "Lihat Ulasan" : "Beri Rating"}
           </Link>
         )}
       </div>

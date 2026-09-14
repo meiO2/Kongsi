@@ -19,6 +19,7 @@
     businessName: string;
     businessCategory: string;
     businessAddress: string;
+    verificationDocumentUrl: string;
     }
 
     export interface SignUpFormErrors {
@@ -29,13 +30,13 @@
     businessName?: string;
     businessCategory?: string;
     businessAddress?: string;
+    verificationDocumentUrl?: string;
     }
 
     export const BUSINESS_CATEGORIES = [
-    "Makanan & Minuman",
+    "Kuliner",
     "Fashion",
-    "Kerajinan Tangan",
-    "Kecantikan & Perawatan",
-    "Jasa",
-    "Lainnya",
+    "Kerajinan",
+    "Kebutuhan Rumah",
+    "Produk Lokal",
     ] as const;

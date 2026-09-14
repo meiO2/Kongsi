@@ -1,4 +1,4 @@
-import type { Review } from "@/lib/customerMockData";
+import type { Review } from "@/lib/customerData";
 import { StarRatingDisplay } from "./StarRating";
 
 export default function ReviewCard({ review }: { review: Review }) {
